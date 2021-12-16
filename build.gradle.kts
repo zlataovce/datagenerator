@@ -8,7 +8,7 @@ version = "0.0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
-    maven("https://repo.screamingsandals.org/public")
+    maven("https://repo.screamingsandals.org/snapshots")
 }
 
 dependencies {
@@ -16,7 +16,7 @@ dependencies {
     implementation("commons-cli:commons-cli:1.5.0")
     implementation("org.ow2.asm:asm:9.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
-    implementation("net.minecraftforge:srgutils:0.4.11-SNAPSHOT")
+    implementation("net.minecraftforge:srgutils:0.4.11-20211216.125050-5")
 }
 
 tasks.withType<Jar> {
