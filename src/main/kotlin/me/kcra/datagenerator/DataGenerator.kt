@@ -73,6 +73,7 @@ fun main(args: Array<String>) {
     val classRemapper = ClassRemapper(refMapping, mapping)
     val minecraftJarReader = MinecraftJarReader(minecraftJar, version)
 
+    println("Preparing Minecraft internals...")
     // SharedConstants.CURRENT_VERSION
     val currentVersionField: Field = Class.forName(
         classRemapper.getClass("net/minecraft/SharedConstants")?.original
@@ -107,7 +108,9 @@ fun main(args: Array<String>) {
         classRemapper.getMethod("net/minecraft/server/Bootstrap", "bootStrap")?.original
             ?: throw RuntimeException("Could not remap method bootStrap of class net/minecraft/server/Bootstrap")
     ).invoke(null)
-    System.setOut(PrintStream(FileOutputStream(FileDescriptor.out)))  // making minecraft's slf4j stfu
+    // making minecraft's slf4j stfu
+    System.setOut(PrintStream(FileOutputStream(FileDescriptor.out)))
+    System.setErr(PrintStream(FileOutputStream(FileDescriptor.err)))
 
     val generators: List<AbstractGenerator<*>> = listOf(
         EntityDataSerializerGenerator(mapper, classRemapper, minecraftJarReader),
@@ -120,5 +123,7 @@ fun main(args: Array<String>) {
         gen.generateJson(Path.of(System.getProperty("user.dir"), "generated", fileName).toAbsolutePath().toFile())
     }
     minecraftJarReader.classLoader.close()
-    Path.of(System.getProperty("user.dir"), "logs").toAbsolutePath().toFile().deleteRecursively()
+    Runtime.getRuntime().addShutdownHook(Thread {
+        Path.of(System.getProperty("user.dir"), "logs").toAbsolutePath().toFile().deleteRecursively()
+    })
 }

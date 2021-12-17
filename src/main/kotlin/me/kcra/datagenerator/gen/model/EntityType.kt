@@ -8,5 +8,6 @@ data class EntityType(
     val height: Float,
     val width: Float,
     val clientTrackingRange: Int,
-    val lootTableLocation: String
+    val lootTableLocation: String,
+    val metadata: List<EntityMetadata>
 )
