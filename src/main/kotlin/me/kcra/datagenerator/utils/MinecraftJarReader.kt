@@ -10,7 +10,7 @@ import java.util.zip.ZipFile
 
 class MinecraftJarReader(file: File, version: String) {
     private val zip: ZipFile
-    private val classLoader: URLClassLoader
+    val classLoader: URLClassLoader
 
     init {
         val currentFile = ZipFile(file)
@@ -24,7 +24,8 @@ class MinecraftJarReader(file: File, version: String) {
             )
             zip = ZipFile(bundledJar)
             val extractedJar: File = Files.createTempDirectory("extracted_jar").toFile()
-            unzip(zip, extractedJar)
+            println("Unzipping Minecraft server JAR...")
+            unzip(currentFile, extractedJar)
             classLoader = URLClassLoader.newInstance(
                 Files.walk(extractedJar.toPath())
                     .map { it.toFile() }
@@ -32,15 +33,16 @@ class MinecraftJarReader(file: File, version: String) {
                     .filter { it.name.endsWith(".jar") }
                     .map { it.toURI().toURL() }
                     .toArray { size -> arrayOfNulls<URL>(size) },
-                this.javaClass.classLoader
+                ClassLoader.getSystemClassLoader()
             )
         } else {
             zip = currentFile
             classLoader = URLClassLoader.newInstance(
                 Array(1) { file.toURI().toURL() },
-                this.javaClass.classLoader
+                ClassLoader.getSystemClassLoader()
             )
         }
+        println("Loaded Minecraft server classes.")
     }
 
     fun readClass(path: String): ClassReader {

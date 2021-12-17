@@ -2,7 +2,9 @@ package me.kcra.datagenerator
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import me.kcra.datagenerator.gen.AbstractGenerator
 import me.kcra.datagenerator.gen.EntityDataSerializerGenerator
+import me.kcra.datagenerator.gen.EntityTypeGenerator
 import me.kcra.datagenerator.mapping.ClassRemapper
 import me.kcra.datagenerator.mapping.MappingSet
 import me.kcra.datagenerator.mapping.SecondaryMappingSet
@@ -16,8 +18,16 @@ import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.HelpFormatter
 import org.apache.commons.cli.Options
 import java.io.File
+import java.io.FileDescriptor
+import java.io.FileOutputStream
+import java.io.PrintStream
+import java.lang.reflect.Field
+import java.nio.file.Path
 
 fun main(args: Array<String>) {
+    val tmpPath: Path = Path.of(System.getProperty("user.dir"), "work").toAbsolutePath()
+    tmpPath.toFile().mkdirs()
+    System.setProperty("java.io.tmpdir", tmpPath.toString())
     val opts: Options = Options()
         .addRequiredOption("v", "version", true, "Version for extraction")
     val cmd: CommandLine
@@ -62,5 +72,53 @@ fun main(args: Array<String>) {
     }
     val classRemapper = ClassRemapper(refMapping, mapping)
     val minecraftJarReader = MinecraftJarReader(minecraftJar, version)
-    println(EntityDataSerializerGenerator(mapper, classRemapper, minecraftJarReader).generateJson())
+
+    // SharedConstants.CURRENT_VERSION
+    val currentVersionField: Field = Class.forName(
+        classRemapper.getClass("net/minecraft/SharedConstants")?.original
+            ?: throw RuntimeException("Could not remap class net/minecraft/SharedConstants"),
+        true,
+        minecraftJarReader.classLoader
+    ).getDeclaredField(
+        classRemapper.getField("net/minecraft/SharedConstants", "CURRENT_VERSION")?.original
+            ?: throw RuntimeException("Could not remap field CURRENT_VERSION of class net/minecraft/SharedConstants")
+    )
+    currentVersionField.trySetAccessible()
+    // SharedConstants.CURRENT_VERSION = DetectedVersion.BUILT_IN
+    currentVersionField.set(
+        null,
+        Class.forName(
+            classRemapper.getClass("net/minecraft/DetectedVersion")?.original
+                ?: throw RuntimeException("Could not remap class net/minecraft/DetectedVersion"),
+            true,
+            minecraftJarReader.classLoader
+        ).getDeclaredField(
+            classRemapper.getField("net/minecraft/DetectedVersion", "BUILT_IN")?.original
+                ?: throw RuntimeException("Could not remap field BUILT_IN of class net/minecraft/DetectedVersion")
+        ).get(null)
+    )
+    // Bootstrap.bootStrap()
+    Class.forName(
+        classRemapper.getClass("net/minecraft/server/Bootstrap")?.original
+            ?: throw RuntimeException("Could not remap class net/minecraft/server/Bootstrap"),
+        true,
+        minecraftJarReader.classLoader
+    ).getDeclaredMethod(
+        classRemapper.getMethod("net/minecraft/server/Bootstrap", "bootStrap")?.original
+            ?: throw RuntimeException("Could not remap method bootStrap of class net/minecraft/server/Bootstrap")
+    ).invoke(null)
+    System.setOut(PrintStream(FileOutputStream(FileDescriptor.out)))  // making minecraft's slf4j stfu
+
+    val generators: List<AbstractGenerator<*>> = listOf(
+        EntityDataSerializerGenerator(mapper, classRemapper, minecraftJarReader),
+        EntityTypeGenerator(mapper, classRemapper, minecraftJarReader)
+    )
+    Path.of(System.getProperty("user.dir"), "generated").toAbsolutePath().toFile().mkdirs()
+    for (gen: AbstractGenerator<*> in generators) {
+        val fileName: String = version.replace(".", "_") + "_" + gen.javaClass.simpleName.replace("generator", "", true) + "s.json"
+        println("Generating $fileName...")
+        gen.generateJson(Path.of(System.getProperty("user.dir"), "generated", fileName).toAbsolutePath().toFile())
+    }
+    minecraftJarReader.classLoader.close()
+    Path.of(System.getProperty("user.dir"), "logs").toAbsolutePath().toFile().deleteRecursively()
 }
