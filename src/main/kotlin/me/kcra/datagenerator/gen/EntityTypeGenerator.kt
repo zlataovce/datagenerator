@@ -33,7 +33,8 @@ class EntityTypeGenerator(
         @Suppress("UNCHECKED_CAST")
         val resourceSet: Set<Any> = entityTypeRegistry.javaClass.getMethod(
             classRemapper.getMethod("net/minecraft/core/MappedRegistry", "keySet")?.original
-                ?: throw RuntimeException("Could not remap method keySet of class net/minecraft/core/MappedRegistry")
+                ?: classRemapper.getMethod("net/minecraft/core/Registry", "keySet")?.original
+                ?: throw RuntimeException("Could not remap method keySet of class net/minecraft/core/Registry")
         ).invoke(entityTypeRegistry) as Set<Any>
 
         // EntityType.class

@@ -5,11 +5,19 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import net.minecraftforge.srgutils.IMappingFile
 
 class ClassRemapper(private val refMapping: MappingSet, private val mapping: SecondaryMappingSet?) {
-    private val overrides: Map<String, String> = jacksonObjectMapper().readValue<HashMap<String, String>>(this.javaClass.getResourceAsStream("/overrides.json")!!)
+    private val classOverrides: Map<String, String>
+    private val memberOverrides: Map<String, String>
+
+    init {
+        jacksonObjectMapper().let { objectMapper ->
+            classOverrides = objectMapper.readValue<HashMap<String, String>>(this.javaClass.getResourceAsStream("/cl-overrides.json")!!)
+            memberOverrides = objectMapper.readValue<HashMap<String, String>>(this.javaClass.getResourceAsStream("/mem-overrides.json")!!)
+        }
+    }
 
     private fun getMappedClass(file: IMappingFile, mapped: String): IMappingFile.IClass? {
         return file.classes.stream()
-            .filter { it.mapped.equals(mapped) || it.mapped.equals(overrides[mapped]) }
+            .filter { it.mapped.equals(mapped) || it.mapped.equals(classOverrides[mapped]) }
             .findFirst()
             .orElse(null)
     }
@@ -23,21 +31,21 @@ class ClassRemapper(private val refMapping: MappingSet, private val mapping: Sec
 
     private fun getMappedMethod(cls: IMappingFile.IClass, method: String, descriptor: String): IMappingFile.IMethod? {
         return cls.methods.stream()
-            .filter { it.mappedDescriptor.equals(descriptor) && it.mapped.equals(method) }
+            .filter { it.mappedDescriptor.equals(descriptor) && (it.mapped.equals(method) || it.mapped.equals(memberOverrides[method])) }
             .findFirst()
             .orElse(null)
     }
 
     private fun getMappedMethod(cls: IMappingFile.IClass, method: String): IMappingFile.IMethod? {
         return cls.methods.stream()
-            .filter { it.mapped.equals(method) }
+            .filter { it.mapped.equals(method) || it.mapped.equals(memberOverrides[method]) }
             .findFirst()
             .orElse(null)
     }
 
     private fun getMappedField(cls: IMappingFile.IClass, field: String): IMappingFile.IField? {
         return cls.fields.stream()
-            .filter { it.mapped.equals(field) }
+            .filter { it.mapped.equals(field) || it.mapped.equals(memberOverrides[field]) }
             .findFirst()
             .orElse(null)
     }
@@ -98,7 +106,7 @@ class ClassRemapper(private val refMapping: MappingSet, private val mapping: Sec
         }
         val seargeClass: IMappingFile.IClass? = refMapping.searge.getClass(mojangRefClass?.original)
         val seargeMethod: IMappingFile.IMethod? =
-            seargeClass?.let { mojangRefClass?.let { getMappedField(it, method)?.original }
+            seargeClass?.let { mojangRefClass?.let { getMappedMethod(it, method)?.original }
                 ?.let { it1 -> getMethod0(it, it1) } }
         val seargeVClass: IMappingFile.IClass? = seargeClass?.let { getMappedClass(mapping.searge, it.mapped) }
         return seargeVClass?.let { seargeMethod?.let { it1 -> getMappedMethod(it, it1.mapped) } }

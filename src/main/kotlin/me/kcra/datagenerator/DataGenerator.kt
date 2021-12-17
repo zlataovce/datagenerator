@@ -74,30 +74,34 @@ fun main(args: Array<String>) {
     val minecraftJarReader = MinecraftJarReader(minecraftJar, version)
 
     println("Preparing Minecraft internals...")
-    // SharedConstants.CURRENT_VERSION
-    val currentVersionField: Field = Class.forName(
-        classRemapper.getClass("net/minecraft/SharedConstants")?.original
-            ?: throw RuntimeException("Could not remap class net/minecraft/SharedConstants"),
-        true,
-        minecraftJarReader.classLoader
-    ).getDeclaredField(
-        classRemapper.getField("net/minecraft/SharedConstants", "CURRENT_VERSION")?.original
-            ?: throw RuntimeException("Could not remap field CURRENT_VERSION of class net/minecraft/SharedConstants")
-    )
-    currentVersionField.trySetAccessible()
-    // SharedConstants.CURRENT_VERSION = DetectedVersion.BUILT_IN
-    currentVersionField.set(
-        null,
-        Class.forName(
-            classRemapper.getClass("net/minecraft/DetectedVersion")?.original
-                ?: throw RuntimeException("Could not remap class net/minecraft/DetectedVersion"),
+    try {
+        // SharedConstants.CURRENT_VERSION
+        val currentVersionField: Field = Class.forName(
+            classRemapper.getClass("net/minecraft/SharedConstants")?.original
+                ?: throw RuntimeException("Could not remap class net/minecraft/SharedConstants"),
             true,
             minecraftJarReader.classLoader
         ).getDeclaredField(
-            classRemapper.getField("net/minecraft/DetectedVersion", "BUILT_IN")?.original
-                ?: throw RuntimeException("Could not remap field BUILT_IN of class net/minecraft/DetectedVersion")
-        ).get(null)
-    )
+            classRemapper.getField("net/minecraft/SharedConstants", "CURRENT_VERSION")?.original
+                ?: throw RuntimeException("Could not remap field CURRENT_VERSION of class net/minecraft/SharedConstants")
+        )
+        currentVersionField.trySetAccessible()
+        // SharedConstants.CURRENT_VERSION = DetectedVersion.BUILT_IN
+        currentVersionField.set(
+            null,
+            Class.forName(
+                classRemapper.getClass("net/minecraft/DetectedVersion")?.original
+                    ?: throw RuntimeException("Could not remap class net/minecraft/DetectedVersion"),
+                true,
+                minecraftJarReader.classLoader
+            ).getDeclaredField(
+                classRemapper.getField("net/minecraft/DetectedVersion", "BUILT_IN")?.original
+                    ?: throw RuntimeException("Could not remap field BUILT_IN of class net/minecraft/DetectedVersion")
+            ).get(null)
+        )
+    } catch (ignored: Exception) {
+        // ignored
+    }
     // Bootstrap.bootStrap()
     Class.forName(
         classRemapper.getClass("net/minecraft/server/Bootstrap")?.original
