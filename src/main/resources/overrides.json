@@ -1,0 +1,3 @@
+{
+  "net/minecraft/network/datasync/DataSerializer": "net/minecraft/network/datasync/IDataSerializer"
+}

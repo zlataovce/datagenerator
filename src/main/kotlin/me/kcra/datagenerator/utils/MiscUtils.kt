@@ -3,11 +3,14 @@ package me.kcra.datagenerator.utils
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import java.util.*
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 fun getFromURL(url: String): File? {
@@ -53,4 +56,21 @@ private fun seargeMapping0(url: String): InputStream? {
 
 fun intermediaryMapping(version: String): File? {
     return getFromURL("https://raw.githubusercontent.com/FabricMC/intermediary/master/mappings/$version.tiny")
+}
+
+fun unzip(zipFile: ZipFile, dest: File): File {
+    val iter: Enumeration<out ZipEntry> = zipFile.entries()
+    while (iter.hasMoreElements()) {
+        val entry: ZipEntry = iter.nextElement()
+        if (entry.isDirectory) {
+            continue
+        }
+        if (entry.name.contains("..")) {
+            throw IOException("Entry is outside of target directory!")
+        }
+        val entryFile: File = Path.of(dest.absolutePath, entry.name).toFile()
+        entryFile.mkdirs()
+        Files.copy(zipFile.getInputStream(entry), entryFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+    }
+    return dest
 }

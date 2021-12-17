@@ -1,11 +1,15 @@
 package me.kcra.datagenerator.mapping
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import net.minecraftforge.srgutils.IMappingFile
 
 class ClassRemapper(private val refMapping: MappingSet, private val mapping: SecondaryMappingSet?) {
+    private val overrides: Map<String, String> = jacksonObjectMapper().readValue<HashMap<String, String>>(this.javaClass.getResourceAsStream("/overrides.json")!!)
+
     private fun getMappedClass(file: IMappingFile, mapped: String): IMappingFile.IClass? {
         return file.classes.stream()
-            .filter { it.mapped.equals(mapped) }
+            .filter { it.mapped.equals(mapped) || it.mapped.equals(overrides[mapped]) }
             .findFirst()
             .orElse(null)
     }
