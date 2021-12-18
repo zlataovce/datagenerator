@@ -95,17 +95,10 @@ class EntityTypeGenerator(
                     classRemapper.getMethod("net/minecraft/world/entity/EntityType", "clientTrackingRange")?.original.let {
                         if (it != null) entityType.javaClass.getMethod(it).invoke(entityType) as Int else null
                     },
-                    // entityType.getDefaultLootTable() (ResourceLocation) or EntityType#getKey(entityType) (ResourceLocation)
+                    // entityType.getDefaultLootTable() (ResourceLocation)
                     classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getDefaultLootTable")?.original.let {
-                        if (it != null) {
-                            return@let entityType.javaClass.getMethod(it).invoke(entityType)
-                        }
-                        return@let entityType.javaClass.getMethod(
-                            classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getKey", "(Lnet/minecraft/world/entity/EntityType;)Lnet/minecraft/resources/ResourceLocation;")?.original
-                                ?: throw RuntimeException("Could not remap method getKey of class net/minecraft/world/entity/EntityType"),
-                            entityTypeClass
-                        ).invoke(null, entityType)
-                    }.toString(),
+                        if (it != null) entityType.javaClass.getMethod(it).invoke(entityType).toString() else null
+                    },
                     Arrays.stream(entityClass.declaredFields)
                         .map { field ->
                             if (!entityDataAccessorClass.isAssignableFrom(field.type)) {
