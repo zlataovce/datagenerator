@@ -32,8 +32,7 @@ class EntityTypeGenerator(
         // Registry.ENTITY_TYPE.keySet() (Set<ResourceLocation>)
         @Suppress("UNCHECKED_CAST")
         val resourceSet: Set<Any> = entityTypeRegistry.javaClass.getMethod(
-            classRemapper.getMethod("net/minecraft/core/MappedRegistry", "keySet")?.original
-                ?: classRemapper.getMethod("net/minecraft/core/Registry", "keySet")?.original
+                classRemapper.getMethod("net/minecraft/core/Registry", "keySet", "()Ljava/util/Set;")?.original
                 ?: throw RuntimeException("Could not remap method keySet of class net/minecraft/core/Registry")
         ).invoke(entityTypeRegistry) as Set<Any>
 
@@ -65,8 +64,8 @@ class EntityTypeGenerator(
         for (entityResourceLocation: Any in resourceSet) {
             // Registry.ENTITY_TYPE.get(entityResourceLocation) (EntityType<?>)
             val entityType: Any = entityTypeRegistry.javaClass.getMethod(
-                classRemapper.getMethod("net/minecraft/core/DefaultedRegistry", "get", "(Lnet/minecraft/resources/ResourceLocation;)Ljava/lang/Object;")?.original
-                    ?: throw RuntimeException("Could not remap method get of class net/minecraft/core/DefaultedRegistry"),
+                classRemapper.getMethod("net/minecraft/core/Registry", "get", "(Lnet/minecraft/resources/ResourceLocation;)Ljava/lang/Object;")?.original
+                    ?: throw RuntimeException("Could not remap method get of class net/minecraft/core/Registry"),
                 Class.forName(classRemapper.getClass("net/minecraft/resources/ResourceLocation")?.original, true, jarReader.classLoader)
             ).invoke(entityTypeRegistry, entityResourceLocation)
             val entityClass: Class<*> = entityClasses[entityType] ?: throw RuntimeException("Missing entityType $entityType")
@@ -74,37 +73,39 @@ class EntityTypeGenerator(
                 EntityType(
                     // Registry.ENTITY_TYPE.getId(entityType) (int)
                     entityTypeRegistry.javaClass.getMethod(
-                        classRemapper.getMethod("net/minecraft/core/DefaultedRegistry", "getId", "(Ljava/lang/Object;)I")?.original
-                            ?: throw RuntimeException("Could not remap method getId of class net/minecraft/core/DefaultedRegistry"),
+                        classRemapper.getMethod("net/minecraft/core/Registry", "getId", "(Ljava/lang/Object;)I")?.original
+                            ?: throw RuntimeException("Could not remap method getId of class net/minecraft/core/Registry"),
                         Object::class.java
                     ).invoke(entityTypeRegistry, entityType) as Int,
                     entityTypeInstances[entityType] ?: throw RuntimeException("Missing entityType $entityType"),
                     entityResourceLocation.toString(),
                     // entityType.fireImmune() (boolean)
-                    entityType.javaClass.getMethod(
-                        classRemapper.getMethod("net/minecraft/world/entity/EntityType", "fireImmune")?.original
-                            ?: throw RuntimeException("Could not remap method fireImmune of class net/minecraft/world/entity/EntityType")
-                    ).invoke(entityType) as Boolean,
+                    classRemapper.getMethod("net/minecraft/world/entity/EntityType", "fireImmune")?.original.let {
+                        if (it != null) entityType.javaClass.getMethod(it).invoke(entityType) as Boolean else null
+                    },
                     // entityType.getHeight() (float)
-                    entityType.javaClass.getMethod(
-                        classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getHeight")?.original
-                            ?: throw RuntimeException("Could not remap method getHeight of class net/minecraft/world/entity/EntityType")
-                    ).invoke(entityType) as Float,
+                    classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getHeight")?.original.let {
+                        if (it != null) entityType.javaClass.getMethod(it).invoke(entityType) as Float else null
+                    },
                     // entityType.getWidth() (float)
-                    entityType.javaClass.getMethod(
-                        classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getWidth")?.original
-                            ?: throw RuntimeException("Could not remap method getWidth of class net/minecraft/world/entity/EntityType")
-                    ).invoke(entityType) as Float,
+                    classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getWidth")?.original.let {
+                        if (it != null) entityType.javaClass.getMethod(it).invoke(entityType) as Float else null
+                    },
                     // entityType.clientTrackingRange() (int)
-                    entityType.javaClass.getMethod(
-                        classRemapper.getMethod("net/minecraft/world/entity/EntityType", "clientTrackingRange")?.original
-                            ?: throw RuntimeException("Could not remap method clientTrackingRange of class net/minecraft/world/entity/EntityType")
-                    ).invoke(entityType) as Int,
-                    // entityType.getDefaultLootTable() (ResourceLocation)
-                    entityType.javaClass.getMethod(
-                        classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getDefaultLootTable")?.original
-                            ?: throw RuntimeException("Could not remap method getDefaultLootTable of class net/minecraft/world/entity/EntityType")
-                    ).invoke(entityType).toString(),
+                    classRemapper.getMethod("net/minecraft/world/entity/EntityType", "clientTrackingRange")?.original.let {
+                        if (it != null) entityType.javaClass.getMethod(it).invoke(entityType) as Int else null
+                    },
+                    // entityType.getDefaultLootTable() (ResourceLocation) or EntityType#getKey(entityType) (ResourceLocation)
+                    classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getDefaultLootTable")?.original.let {
+                        if (it != null) {
+                            return@let entityType.javaClass.getMethod(it).invoke(entityType)
+                        }
+                        return@let entityType.javaClass.getMethod(
+                            classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getKey", "(Lnet/minecraft/world/entity/EntityType;)Lnet/minecraft/resources/ResourceLocation;")?.original
+                                ?: throw RuntimeException("Could not remap method getKey of class net/minecraft/world/entity/EntityType"),
+                            entityTypeClass
+                        ).invoke(null, entityType)
+                    }.toString(),
                     Arrays.stream(entityClass.declaredFields)
                         .map { field ->
                             if (!entityDataAccessorClass.isAssignableFrom(field.type)) {
@@ -127,7 +128,6 @@ class EntityTypeGenerator(
                                 entityDataSerializers[serializer] ?: throw RuntimeException("Could not find EntityDataSerializer")
                             )
                         }
-                        .filter { it != null }
                         .toList()
                         .filterNotNull()
                 )

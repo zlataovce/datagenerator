@@ -1,6 +1,0 @@
-{
-  "net/minecraft/network/datasync/DataSerializer": "net/minecraft/network/datasync/IDataSerializer",
-  "net/minecraft/entity/EntityType": "net/minecraft/entity/EntityList",
-  "net/minecraft/util/registry/Bootstrap": "net/minecraft/init/Bootstrap",
-  "net/minecraft/util/registry/Registry": "net/minecraft/util/registry/IRegistry"
-}
