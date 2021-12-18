@@ -104,16 +104,27 @@ fun main(args: Array<String>) {
     } catch (ignored: Exception) {
         // ignored
     }
-    // Bootstrap.bootStrap()
-    Class.forName(
+    // Bootstrap.class
+    val bootstrapClass: Class<*> = Class.forName(
         classRemapper.getClass("net/minecraft/server/Bootstrap")?.original
             ?: throw RuntimeException("Could not remap class net/minecraft/server/Bootstrap"),
         true,
         minecraftJarReader.classLoader
-    ).getDeclaredMethod(
+    )
+    // Bootstrap.bootStrap()
+    bootstrapClass.getDeclaredMethod(
         classRemapper.getMethod("net/minecraft/server/Bootstrap", "bootStrap")?.original
             ?: throw RuntimeException("Could not remap method bootStrap of class net/minecraft/server/Bootstrap")
     ).invoke(null)
+    // Bootstrap.isBootstrapped
+    val isBootstrappedField: Field = bootstrapClass.getDeclaredField(
+        classRemapper.getField("net/minecraft/server/Bootstrap", "isBootstrapped")?.original
+            ?: throw RuntimeException("Could not remap field isBootstrapped of class net/minecraft/server/Bootstrap")
+    )
+    isBootstrappedField.trySetAccessible()
+    println("Is bootstrapped: " + isBootstrappedField.get(null) as Boolean)
+    isBootstrappedField.set(null, true)
+
     // making minecraft's slf4j stfu
     System.setOut(PrintStream(FileOutputStream(FileDescriptor.out)))
     System.setErr(PrintStream(FileOutputStream(FileDescriptor.err)))

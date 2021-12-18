@@ -28,6 +28,16 @@ class ClassRemapper(
         return mapped
     }
 
+    private fun getMappedClassPkgInsensitive(file: IMappingFile, mapped: String): IMappingFile.IClass? {
+        return file.classes.stream()
+            .filter {
+                val overriden: String = checkOverrides(mapped, "class")
+                it.mapped.substring(it.mapped.lastIndexOf('/') + 1) == overriden.substring(overriden.lastIndexOf('/') + 1)
+            }
+            .findFirst()
+            .orElse(null)
+    }
+
     private fun getMappedClass(file: IMappingFile, mapped: String): IMappingFile.IClass? {
         return file.classes.stream()
             .filter { it.mapped.equals(checkOverrides(mapped, "class")) }
@@ -220,11 +230,14 @@ class ClassRemapper(
         val seargeClass: IMappingFile.IClass = mapping.searge.getClass(cls)
         val seargeField: IMappingFile.IField? = seargeClass.getField(field)
         var seargeVClass: IMappingFile.IClass? = getMappedClass(refMapping.searge, seargeClass.mapped)
+        println(seargeClass.mapped)
         // 1.14> searge entity class name inconsistency fix
         if (seargeVClass == null && seargeClass.mapped.startsWith("net/minecraft/entity")
-            && seargeClass.mapped.substring(seargeClass.mapped.lastIndexOf('/') + 1).startsWith("Entity")) {
-            seargeVClass = getMappedClass(refMapping.searge, seargeClass.mapped.replace("Entity", "") + "Entity")
+            && seargeClass.mapped.substring(seargeClass.mapped.lastIndexOf('/') + 1).startsWith("Entity")
+        ) {
+            seargeVClass = getMappedClassPkgInsensitive(refMapping.searge, seargeClass.mapped.replace("Entity", "") + "Entity")
         }
+        println(seargeVClass)
         val seargeVField: IMappingFile.IField? =
             seargeVClass?.let { seargeField?.let { it1 -> getMappedField(it, it1.mapped) } }
         return refMapping.mojang.getClass(seargeVClass?.original)?.getField(seargeVField?.original)
