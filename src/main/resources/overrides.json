@@ -206,5 +206,75 @@
       "1.13.1",
       "1.13.2"
     ]
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/entity/passive/EntityPufferFish",
+    "old": "net/minecraft/entity/passive/fish/PufferfishEntity",
+    "versions": [
+      "1.13",
+      "1.13.1",
+      "1.13.2"
+    ]
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/entity/item/EntityTNTPrimed",
+    "old": "net/minecraft/entity/item/TNTEntity",
+    "versions": [
+      "1.9.4",
+      "1.10",
+      "1.10.1",
+      "1.10.2",
+      "1.11",
+      "1.11.1",
+      "1.11.2",
+      "1.12",
+      "1.12.1",
+      "1.12.2",
+      "1.13",
+      "1.13.1",
+      "1.13.2"
+    ]
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/entity/monster/EntitySnowman",
+    "old": "net/minecraft/entity/passive/SnowGolemEntity",
+    "versions": [
+      "1.9.4",
+      "1.10",
+      "1.10.1",
+      "1.10.2",
+      "1.11",
+      "1.11.1",
+      "1.11.2",
+      "1.12",
+      "1.12.1",
+      "1.12.2",
+      "1.13",
+      "1.13.1",
+      "1.13.2"
+    ]
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/entity/projectile/EntityFishHook",
+    "old": "net/minecraft/entity/projectile/FishingBobberEntity",
+    "versions": [
+      "1.9.4",
+      "1.10",
+      "1.10.1",
+      "1.10.2",
+      "1.11",
+      "1.11.1",
+      "1.11.2",
+      "1.12",
+      "1.12.1",
+      "1.12.2",
+      "1.13",
+      "1.13.1",
+      "1.13.2"
+    ]
   }
 ]

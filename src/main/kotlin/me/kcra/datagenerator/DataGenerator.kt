@@ -31,6 +31,7 @@ fun main(args: Array<String>) {
     val opts: Options = Options()
         .addRequiredOption("v", "version", true, "Version for extraction")
         .addOption("r", "ref", true, "Reference mapping version (needs Mojang mappings)")
+        .addOption("r2", "ref2", true, "Secondary reference mapping version (needs Mojang mappings)")
     val cmd: CommandLine
     try {
         cmd = DefaultParser().parse(opts, args)
@@ -40,6 +41,7 @@ fun main(args: Array<String>) {
     }
     val version: String = cmd.getOptionValue("v")
     val refVersion: String = cmd.getOptionValue("r", "1.16.5")
+    val refVersion2: String = cmd.getOptionValue("r2", "1.14.4")
 
     val mapper: ObjectMapper = jacksonObjectMapper()
     println("Retrieving Minecraft server JAR...")
@@ -72,7 +74,12 @@ fun main(args: Array<String>) {
             if (intermediary != null) IMappingFile.load(intermediary) else null
         )
     }
-    val classRemapper = ClassRemapper(refMapping, mapping, refVersion, version)
+    val refMapping2 = MappingSet(
+        IMappingFile.load(minecraftResource(mapper, refVersion2, "server_mappings")).reverse(),
+        IMappingFile.load(seargeMapping(refVersion2)),
+        IMappingFile.load(intermediaryMapping(refVersion2))
+    )
+    val classRemapper = ClassRemapper(refMapping, if (mapping == null) null else refMapping2, mapping, refVersion, version)
     val minecraftJarReader = MinecraftJarReader(minecraftJar, version)
 
     println("Preparing Minecraft internals...")

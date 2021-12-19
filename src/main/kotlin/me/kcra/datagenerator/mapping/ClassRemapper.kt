@@ -8,6 +8,7 @@ import kotlin.collections.ArrayList
 
 class ClassRemapper(
     private val refMapping: MappingSet,
+    private val refMapping2: MappingSet?,
     private val mapping: SecondaryMappingSet?,
     private val refVersion: String,
     private val currentVersion: String
@@ -214,32 +215,36 @@ class ClassRemapper(
         val seargeVClass: IMappingFile.IClass? = seargeClass?.let { getMappedClass(mapping.searge, it.mapped) }
         return seargeVClass?.let { seargeField?.let { it1 -> getMappedField(it, it1.mapped) } }
     }
-
+    
     fun remapField(cls: String, field: String): IMappingFile.IField? {
+        return remapField(cls, field, refMapping, true)
+    }
+
+    private fun remapField(cls: String, field: String, refMappingLocal: MappingSet, firstRemapping: Boolean): IMappingFile.IField? {
         if (mapping == null) {
-            return refMapping.mojang.getClass(cls).getField(field)
+            return refMappingLocal.mojang.getClass(cls).getField(field)
         }
         if (mapping.intermediary != null) {
             val intermClass: IMappingFile.IClass = mapping.intermediary.getClass(cls)
             val intermField: IMappingFile.IField? = intermClass.getField(field)
-            val intermVClass: IMappingFile.IClass? = getMappedClass(refMapping.intermediary, intermClass.mapped)
+            val intermVClass: IMappingFile.IClass? = getMappedClass(refMappingLocal.intermediary, intermClass.mapped)
             val intermVField: IMappingFile.IField? =
                 intermVClass?.let { intermField?.let { it1 -> getMappedField(it, it1.mapped) } }
-            return refMapping.mojang.getClass(intermVClass?.original)?.getField(intermVField?.original)
+            return refMappingLocal.mojang.getClass(intermVClass?.original)?.getField(intermVField?.original)
         }
         val seargeClass: IMappingFile.IClass = mapping.searge.getClass(cls)
         val seargeField: IMappingFile.IField? = seargeClass.getField(field)
-        var seargeVClass: IMappingFile.IClass? = getMappedClass(refMapping.searge, seargeClass.mapped)
+        var seargeVClass: IMappingFile.IClass? = getMappedClass(refMappingLocal.searge, seargeClass.mapped)
         println(seargeClass.mapped)
         // 1.14> searge entity class name inconsistency fix
         if (seargeVClass == null && seargeClass.mapped.startsWith("net/minecraft/entity")
             && seargeClass.mapped.substring(seargeClass.mapped.lastIndexOf('/') + 1).startsWith("Entity")
         ) {
-            seargeVClass = getMappedClassPkgInsensitive(refMapping.searge, seargeClass.mapped.replace("Entity", "") + "Entity")
+            seargeVClass = getMappedClassPkgInsensitive(refMappingLocal.searge, seargeClass.mapped.replace("Entity", "") + "Entity")
         }
         println(seargeVClass)
         val seargeVField: IMappingFile.IField? =
             seargeVClass?.let { seargeField?.let { it1 -> getMappedField(it, it1.mapped) } }
-        return refMapping.mojang.getClass(seargeVClass?.original)?.getField(seargeVField?.original)
+        return refMappingLocal.mojang.getClass(seargeVClass?.original)?.getField(seargeVField?.original) ?: if (refMapping2 != null && firstRemapping) remapField(cls, field, refMapping2, false) else null
     }
 }

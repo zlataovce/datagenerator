@@ -109,7 +109,8 @@ class EntityTypeGenerator(
                             try {
                                 eda = field.get(null)
                             } catch (e: Throwable) {
-                                println("Skipping metadata field " + field.name + " due to EntityDataAccessor initialization error: " + e.message)
+                                println("Skipping metadata field " + field.name + " due to EntityDataAccessor initialization error.")
+                                e.printStackTrace()
                                 return@map null
                             }
                             val serializer: Any = eda.javaClass.getMethod(
