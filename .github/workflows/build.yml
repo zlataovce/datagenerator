@@ -1,0 +1,42 @@
+name: Build and generate data
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
+      - name: Build with Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew shadowJar
+        shell: bash
+      - name: Read version from gradle.properties
+        id: read_property
+        uses: christian-draeger/read-properties@1.0.1
+        with:
+          path: './gradle.properties'
+          property: 'datagenerator.version'
+      - name: Generate data
+        run: |
+          chmod +x actions_generate.sh
+          ./actions_generate.sh
+        shell: bash
+        env:
+          DATAGEN_VERSION: ${{ steps.read_property.outputs.value }}
+      - name: Upload the JAR and data
+        uses: actions/upload-artifact@v2
+        with:
+          path: |
+            build/libs/datagenerator-${{ steps.read_property.outputs.value }}-all.jar
+            generated/

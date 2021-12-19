@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "me.kcra"
-version = "0.0.1-SNAPSHOT"
+version = project.properties["datagenerator.version"] as String
 
 repositories {
     mavenCentral()
