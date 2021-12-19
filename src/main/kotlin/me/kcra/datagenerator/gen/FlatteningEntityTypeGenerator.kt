@@ -9,7 +9,7 @@ import java.lang.reflect.Field
 import java.lang.reflect.ParameterizedType
 import java.util.*
 
-class EntityTypeGenerator(
+class FlatteningEntityTypeGenerator(
     jsonMapper: ObjectMapper,
     classRemapper: ClassRemapper,
     jarReader: MinecraftJarReader

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import me.kcra.datagenerator.gen.AbstractGenerator
 import me.kcra.datagenerator.gen.EntityDataSerializerGenerator
-import me.kcra.datagenerator.gen.EntityTypeGenerator
+import me.kcra.datagenerator.gen.FlatteningEntityTypeGenerator
 import me.kcra.datagenerator.mapping.ClassRemapper
 import me.kcra.datagenerator.mapping.MappingSet
 import me.kcra.datagenerator.mapping.SecondaryMappingSet
@@ -123,6 +123,9 @@ fun main(args: Array<String>) {
         classRemapper.getMethod("net/minecraft/server/Bootstrap", "bootStrap")?.original
             ?: throw RuntimeException("Could not remap method bootStrap of class net/minecraft/server/Bootstrap")
     ).invoke(null)
+    // making minecraft's slf4j stfu
+    System.setOut(PrintStream(FileOutputStream(FileDescriptor.out)))
+    System.setErr(PrintStream(FileOutputStream(FileDescriptor.err)))
     // Bootstrap.isBootstrapped
     val isBootstrappedField: Field = bootstrapClass.getDeclaredField(
         classRemapper.getField("net/minecraft/server/Bootstrap", "isBootstrapped")?.original
@@ -132,13 +135,9 @@ fun main(args: Array<String>) {
     println("Is bootstrapped: " + isBootstrappedField.get(null) as Boolean)
     isBootstrappedField.set(null, true)
 
-    // making minecraft's slf4j stfu
-    System.setOut(PrintStream(FileOutputStream(FileDescriptor.out)))
-    System.setErr(PrintStream(FileOutputStream(FileDescriptor.err)))
-
     val generators: List<AbstractGenerator<*>> = listOf(
         EntityDataSerializerGenerator(mapper, classRemapper, minecraftJarReader),
-        EntityTypeGenerator(mapper, classRemapper, minecraftJarReader)
+        FlatteningEntityTypeGenerator(mapper, classRemapper, minecraftJarReader)
     )
     Path.of(System.getProperty("user.dir"), "generated").toAbsolutePath().toFile().mkdirs()
     for (gen: AbstractGenerator<*> in generators) {
