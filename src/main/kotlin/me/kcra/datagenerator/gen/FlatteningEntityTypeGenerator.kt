@@ -118,21 +118,18 @@ class FlatteningEntityTypeGenerator(
                                     ?: throw RuntimeException("Could not remap method getSerializer of class net/minecraft/network/syncher/EntityDataAccessor")
                             ).invoke(eda)
 
-                            try {
-                                return@map EntityMetadata(
-                                    classRemapper.remapField(entityClass.name, field.name)?.mapped
-                                        ?: throw RuntimeException("Could not remap field " + field.name + " of class " + entityClass.name),
-                                    eda.javaClass.getMethod(
-                                        classRemapper.getMethod("net/minecraft/network/syncher/EntityDataAccessor", "getId")?.original
-                                            ?: throw RuntimeException("Could not remap method getId of class net/minecraft/network/syncher/EntityDataAccessor")
-                                    ).invoke(eda) as Int,
-                                    entityDataSerializers[serializer] ?: throw RuntimeException("Could not find EntityDataSerializer")
-                                )
-                            } catch (ignored: Exception) {
-                                ignored.printStackTrace()
-                                // ignored
-                            }
-                            return@map null
+                            return@map EntityMetadata(
+                                classRemapper.remapField(entityClass.name, field.name)?.mapped.also {
+                                    if (it == null) {
+                                        println("Could not remap serializer field " + field.name + " of class " + entityClass.name)
+                                    }
+                                },
+                                eda.javaClass.getMethod(
+                                    classRemapper.getMethod("net/minecraft/network/syncher/EntityDataAccessor", "getId")?.original
+                                        ?: throw RuntimeException("Could not remap method getId of class net/minecraft/network/syncher/EntityDataAccessor")
+                                ).invoke(eda) as Int,
+                                entityDataSerializers[serializer] ?: throw RuntimeException("Could not find EntityDataSerializer")
+                            )
                         }
                         .toList()
                         .filterNotNull()

@@ -235,14 +235,12 @@ class ClassRemapper(
         val seargeClass: IMappingFile.IClass = mapping.searge.getClass(cls)
         val seargeField: IMappingFile.IField? = seargeClass.getField(field)
         var seargeVClass: IMappingFile.IClass? = getMappedClass(refMappingLocal.searge, seargeClass.mapped)
-        println(seargeClass.mapped)
         // 1.14> searge entity class name inconsistency fix
         if (seargeVClass == null && seargeClass.mapped.startsWith("net/minecraft/entity")
             && seargeClass.mapped.substring(seargeClass.mapped.lastIndexOf('/') + 1).startsWith("Entity")
         ) {
             seargeVClass = getMappedClassPkgInsensitive(refMappingLocal.searge, seargeClass.mapped.replace("Entity", "") + "Entity")
         }
-        println(seargeVClass)
         val seargeVField: IMappingFile.IField? =
             seargeVClass?.let { seargeField?.let { it1 -> getMappedField(it, it1.mapped) } }
         return refMappingLocal.mojang.getClass(seargeVClass?.original)?.getField(seargeVField?.original) ?: if (refMapping2 != null && firstRemapping) remapField(cls, field, refMapping2, false) else null
