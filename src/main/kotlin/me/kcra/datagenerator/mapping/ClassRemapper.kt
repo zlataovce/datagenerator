@@ -127,14 +127,11 @@ class ClassRemapper(
                 }
             val intermVClass: IMappingFile.IClass? =
                 intermClass?.let { getMappedClass(mapping.intermediary, it.mapped) }
-            return intermVClass?.let {
-                intermMethod?.let { it1 ->
-                    getMappedMethod(
-                        it,
-                        it1.mapped,
-                        it1.mappedDescriptor
-                    )
-                }
+            val result: IMappingFile.IMethod? =
+                intermMethod?.let { intermVClass?.let { it1 -> getMappedMethod(it1, it.mapped, intermMethod.mappedDescriptor) } }
+            // intermediary for Registry#getId is missing in 1.14.x for some reason
+            if (result != null) {
+                return result
             }
         }
         val seargeClass: IMappingFile.IClass? = refMapping.searge.getClass(mojangRefClass?.original)
@@ -230,7 +227,7 @@ class ClassRemapper(
             val intermVClass: IMappingFile.IClass? = getMappedClass(refMappingLocal.intermediary, intermClass.mapped)
             val intermVField: IMappingFile.IField? =
                 intermVClass?.let { intermField?.let { it1 -> getMappedField(it, it1.mapped) } }
-            return refMappingLocal.mojang.getClass(intermVClass?.original)?.getField(intermVField?.original)
+            return refMappingLocal.mojang.getClass(intermVClass?.original)?.getField(intermVField?.original) ?: if (refMapping2 != null && firstRemapping) remapField(cls, field, refMapping2, false) else null
         }
         val seargeClass: IMappingFile.IClass = mapping.searge.getClass(cls)
         val seargeField: IMappingFile.IField? = seargeClass.getField(field)
