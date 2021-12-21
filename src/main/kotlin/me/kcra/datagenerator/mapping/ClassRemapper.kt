@@ -25,7 +25,8 @@ class ClassRemapper(
     private fun checkOverrides(mapped: String, type: String): String {
         val override: Optional<MappingOverride> = overrides.stream()
             .filter {
-                currentVersion.isBetween(it.minVersion!!, it.maxVersion!!) && !refVersion.isBetween(it.minVersion!!, it.maxVersion!!)
+                currentVersion.isBetween(it.versions.minVersion, it.versions.maxVersion)
+                        && !refVersion.isBetween(it.versions.minVersion, it.versions.maxVersion)
                         && it.new == mapped && it.type == type
             }
             .findFirst()

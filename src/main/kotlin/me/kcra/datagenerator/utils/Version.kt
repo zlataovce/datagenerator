@@ -1,5 +1,11 @@
 package me.kcra.datagenerator.utils
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+
+@JsonDeserialize(using = Version.VersionDeserializer::class)
 class Version(version: String) {
     val majorVersion: Int
     val minorVersion: Int
@@ -94,5 +100,23 @@ class Version(version: String) {
         if (suffix != other.suffix) return false
 
         return true
+    }
+
+    @JsonDeserialize(using = VersionRangeDeserializer::class)
+    data class VersionRange(
+        val minVersion: Version,
+        val maxVersion: Version
+    )
+
+    class VersionDeserializer : StdDeserializer<Version>(Version::class.java) {
+        override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Version {
+            return Version(p.valueAsString)
+        }
+    }
+
+    class VersionRangeDeserializer : StdDeserializer<VersionRange>(VersionRange::class.java) {
+        override fun deserialize(p: JsonParser, ctxt: DeserializationContext): VersionRange {
+            return p.valueAsString.split("->", limit = 2).let { VersionRange(Version(it[0]), Version(it[1])) }
+        }
     }
 }
