@@ -2,6 +2,7 @@ package me.kcra.datagenerator.mapping
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import me.kcra.datagenerator.utils.Version
 import net.minecraftforge.srgutils.IMappingFile
 import java.util.*
 import kotlin.collections.ArrayList
@@ -10,16 +11,21 @@ class ClassRemapper(
     private val refMapping: MappingSet,
     private val refMapping2: MappingSet?,
     private val mapping: SecondaryMappingSet?,
-    private val refVersion: String,
-    private val currentVersion: String
+    private val refVersion: Version,
+    private val currentVersion: Version
 ) {
     private val overrides: List<MappingOverride> =
         jacksonObjectMapper().readValue<ArrayList<MappingOverride>>(this.javaClass.getResourceAsStream("/overrides.json")!!)
 
+    companion object {
+        @JvmStatic
+        val typeParamPattern: Regex = Regex("<[^>]>")
+    }
+
     private fun checkOverrides(mapped: String, type: String): String {
         val override: Optional<MappingOverride> = overrides.stream()
             .filter {
-                it.versions.contains(currentVersion) && !it.versions.contains(refVersion)
+                currentVersion.isBetween(it.minVersion!!, it.maxVersion!!) && !refVersion.isBetween(it.minVersion!!, it.maxVersion!!)
                         && it.new == mapped && it.type == type
             }
             .findFirst()
@@ -56,7 +62,7 @@ class ClassRemapper(
     private fun getMappedMethod(cls: IMappingFile.IClass, method: String, descriptor: String): IMappingFile.IMethod? {
         return cls.methods.stream()
             .filter {
-                it.mappedDescriptor.replace(Regex("<[^>]>"), "") == descriptor
+                it.mappedDescriptor.replace(typeParamPattern, "") == descriptor
                         && it.mapped.equals(checkOverrides(method, "method"))
             }
             .findFirst()
@@ -94,9 +100,9 @@ class ClassRemapper(
         )
         // 1.14> searge entity class name inconsistency fix
         if (result == null && isSeargeEntityClassNew(refClass.mapped)) {
-            val classParts: MutableList<String> = ArrayList(refClass.mapped.split("/"))
-            classParts[classParts.lastIndex] = "Entity" + classParts.last().replaceFirst("Entity", "")
-            return getMappedClassPkgInsensitive(mapping.searge, classParts.joinToString("/"))
+            val originalClass: String = refClass.mapped.substring(refClass.mapped.lastIndexOf('/') + 1)
+            val fixedClass: String = "Entity" + originalClass.replaceFirst("Entity", "")
+            return getMappedClassPkgInsensitive(mapping.searge, refClass.mapped.replaceFirst(originalClass, fixedClass))
         }
         return result
     }

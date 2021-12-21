@@ -8,10 +8,7 @@ import me.kcra.datagenerator.gen.FlatteningEntityTypeGenerator
 import me.kcra.datagenerator.mapping.ClassRemapper
 import me.kcra.datagenerator.mapping.MappingSet
 import me.kcra.datagenerator.mapping.SecondaryMappingSet
-import me.kcra.datagenerator.utils.MinecraftJarReader
-import me.kcra.datagenerator.utils.intermediaryMapping
-import me.kcra.datagenerator.utils.minecraftResource
-import me.kcra.datagenerator.utils.seargeMapping
+import me.kcra.datagenerator.utils.*
 import net.minecraftforge.srgutils.IMappingFile
 import org.apache.commons.cli.CommandLine
 import org.apache.commons.cli.DefaultParser
@@ -39,48 +36,48 @@ fun main(args: Array<String>) {
         HelpFormatter().printHelp("DataGenerator", opts)
         return
     }
-    val version: String = cmd.getOptionValue("v")
-    val refVersion: String = cmd.getOptionValue("r", "1.16.5")
-    val refVersion2: String = cmd.getOptionValue("r2", "1.14.4")
+    val version = Version(cmd.getOptionValue("v"))
+    val refVersion = Version(cmd.getOptionValue("r", "1.16.5"))
+    val refVersion2 = Version(cmd.getOptionValue("r2", "1.14.4"))
 
     val mapper: ObjectMapper = jacksonObjectMapper()
     println("Retrieving Minecraft server JAR...")
-    val minecraftJar: File? = minecraftResource(mapper, version, "server")
+    val minecraftJar: File? = minecraftResource(mapper, version.toString(), "server")
     if (minecraftJar == null) {
         println("Could not retrieve Minecraft JAR for version $version!")
         return
     }
-    val mojMap: File? = minecraftResource(mapper, version, "server_mappings")
+    val mojMap: File? = minecraftResource(mapper, version.toString(), "server_mappings")
     val refMapping: MappingSet
     val mapping: SecondaryMappingSet?
     if (mojMap != null) {
         println("Mojang mappings available, using them for remapping.")
         refMapping = MappingSet(
             IMappingFile.load(mojMap).reverse(),
-            IMappingFile.load(seargeMapping(version)),
-            IMappingFile.load(intermediaryMapping(version))
+            IMappingFile.load(seargeMapping(version.toString())),
+            IMappingFile.load(intermediaryMapping(version.toString()))
         )
         mapping = null
     } else {
         println("Mojang mappings are not available for the selected version, tracing history using Searge and Intermediary.")
         refMapping = MappingSet(
-            IMappingFile.load(minecraftResource(mapper, refVersion, "server_mappings")).reverse(),
-            IMappingFile.load(seargeMapping(refVersion)),
-            IMappingFile.load(intermediaryMapping(refVersion))
+            IMappingFile.load(minecraftResource(mapper, refVersion.toString(), "server_mappings")).reverse(),
+            IMappingFile.load(seargeMapping(refVersion.toString())),
+            IMappingFile.load(intermediaryMapping(refVersion.toString()))
         )
-        val intermediary: File? = intermediaryMapping(version)
+        val intermediary: File? = intermediaryMapping(version.toString())
         mapping = SecondaryMappingSet(
-            IMappingFile.load(seargeMapping(version)),
+            IMappingFile.load(seargeMapping(version.toString())),
             if (intermediary != null) IMappingFile.load(intermediary) else null
         )
     }
     val refMapping2 = MappingSet(
-        IMappingFile.load(minecraftResource(mapper, refVersion2, "server_mappings")).reverse(),
-        IMappingFile.load(seargeMapping(refVersion2)),
-        IMappingFile.load(intermediaryMapping(refVersion2))
+        IMappingFile.load(minecraftResource(mapper, refVersion2.toString(), "server_mappings")).reverse(),
+        IMappingFile.load(seargeMapping(refVersion2.toString())),
+        IMappingFile.load(intermediaryMapping(refVersion2.toString()))
     )
     val classRemapper = ClassRemapper(refMapping, if (mapping == null) null else refMapping2, mapping, refVersion, version)
-    val minecraftJarReader = MinecraftJarReader(minecraftJar, version)
+    val minecraftJarReader = MinecraftJarReader(minecraftJar, version.toString())
 
     println("Preparing Minecraft internals...")
     try {
@@ -135,18 +132,19 @@ fun main(args: Array<String>) {
     println("Is bootstrapped: " + isBootstrappedField.get(null) as Boolean)
     isBootstrappedField.set(null, true)
 
-    val generators: List<AbstractGenerator<*>> = listOf(
-        EntityDataSerializerGenerator(mapper, classRemapper, minecraftJarReader),
-        FlatteningEntityTypeGenerator(mapper, classRemapper, minecraftJarReader)
-    )
+    val generators: List<AbstractGenerator<*>> = mutableListOf<AbstractGenerator<*>>(
+        EntityDataSerializerGenerator(mapper, classRemapper, minecraftJarReader)
+    ).also {
+        if (version.isNewerThan(1, 13, 0, null)) {
+            it.add(FlatteningEntityTypeGenerator(mapper, classRemapper, minecraftJarReader))
+        }
+    }
     Path.of(System.getProperty("user.dir"), "generated").toAbsolutePath().toFile().mkdirs()
     for (gen: AbstractGenerator<*> in generators) {
-        val fileName: String = version.replace(".", "_") + "_" + gen.javaClass.simpleName.replace("generator", "", true) + "s.json"
+        val fileName: String = version.toString().replace(".", "_") + "_" + gen.javaClass.simpleName.replace("generator", "", true) + "s.json"
         println("Generating $fileName...")
         gen.generateJson(Path.of(System.getProperty("user.dir"), "generated", fileName).toAbsolutePath().toFile())
     }
     minecraftJarReader.classLoader.close()
-    Runtime.getRuntime().addShutdownHook(Thread {
-        Path.of(System.getProperty("user.dir"), "logs").toAbsolutePath().toFile().deleteRecursively()
-    })
+    Path.of(System.getProperty("user.dir"), "logs").toAbsolutePath().toFile().deleteRecursively()
 }

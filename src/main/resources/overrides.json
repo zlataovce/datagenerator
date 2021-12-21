@@ -3,298 +3,92 @@
     "type": "class",
     "new": "net/minecraft/util/registry/Bootstrap",
     "old": "net/minecraft/init/Bootstrap",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/entity/EntityType",
     "old": "net/minecraft/entity/EntityList",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2"
-    ]
+    "versions": "1.9.4->1.12.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/network/datasync/IDataSerializer",
     "old": "net/minecraft/network/datasync/DataSerializer",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/util/registry/Registry",
     "old": "net/minecraft/util/registry/IRegistry",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/util/registry/SimpleRegistry",
     "old": "net/minecraft/util/registry/RegistryNamespaced",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   },
   {
     "_comment": "EntityType#ZOMBIE_PIGMAN",
     "type": "field",
     "new": "field_200785_Y",
     "old": "field_233592_ba_",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2",
-      "1.14",
-      "1.14.1",
-      "1.14.2",
-      "1.14.3",
-      "1.14.4",
-      "1.15",
-      "1.15.1",
-      "1.15.2",
-      "1.16"
-    ]
+    "versions": "1.9.4->1.16"
   },
   {
     "_comment": "Registry#get(ResourceLocation)",
     "type": "method",
     "new": "func_82594_a",
     "old": "func_212608_b",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/entity/projectile/EntityTippedArrow",
     "old": "net/minecraft/entity/projectile/ArrowEntity",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/entity/boss/EntityDragon",
     "old": "net/minecraft/entity/boss/dragon/EnderDragonEntity",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/entity/item/EntityMinecartCommandBlock",
     "old": "net/minecraft/entity/item/minecart/CommandBlockMinecartEntity",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/entity/passive/EntityPufferFish",
     "old": "net/minecraft/entity/passive/fish/PufferfishEntity",
-    "versions": [
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.13->1.13.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/entity/item/EntityTNTPrimed",
     "old": "net/minecraft/entity/item/TNTEntity",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/entity/monster/EntitySnowman",
     "old": "net/minecraft/entity/passive/SnowGolemEntity",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/entity/projectile/EntityFishHook",
     "old": "net/minecraft/entity/projectile/FishingBobberEntity",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   },
   {
     "type": "class",
     "new": "net/minecraft/entity/item/ExperienceOrbEntity",
     "old": "net/minecraft/entity/item/EntityXPOrb",
-    "versions": [
-      "1.9.4",
-      "1.10",
-      "1.10.1",
-      "1.10.2",
-      "1.11",
-      "1.11.1",
-      "1.11.2",
-      "1.12",
-      "1.12.1",
-      "1.12.2",
-      "1.13",
-      "1.13.1",
-      "1.13.2"
-    ]
+    "versions": "1.9.4->1.13.2"
   }
 ]
