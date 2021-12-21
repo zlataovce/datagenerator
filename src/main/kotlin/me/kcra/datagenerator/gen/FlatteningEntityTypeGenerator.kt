@@ -111,7 +111,7 @@ class FlatteningEntityTypeGenerator(
             true,
             jarReader.classLoader
         )
-        // Registry.ENTITY_TYPE (DefaultedRegistry)
+        // Registry.ENTITY_TYPE (Registry)
         val entityTypeRegistry: Any = registryClass.getDeclaredField(
             classRemapper.getField("net/minecraft/core/Registry", "ENTITY_TYPE")?.original
                 ?: throw RuntimeException("Could not remap field ENTITY_TYPE of class net/minecraft/core/Registry")
