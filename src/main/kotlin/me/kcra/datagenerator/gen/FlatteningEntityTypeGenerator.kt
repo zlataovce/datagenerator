@@ -5,7 +5,6 @@ import me.kcra.datagenerator.gen.model.EntityMetadata
 import me.kcra.datagenerator.gen.model.EntityType
 import me.kcra.datagenerator.mapping.ClassRemapper
 import me.kcra.datagenerator.utils.MinecraftJarReader
-import java.lang.reflect.Field
 import java.lang.reflect.ParameterizedType
 import java.util.*
 
@@ -14,8 +13,97 @@ class FlatteningEntityTypeGenerator(
     classRemapper: ClassRemapper,
     jarReader: MinecraftJarReader
 ) : AbstractGenerator<Array<EntityType>>(jsonMapper, classRemapper, jarReader) {
+    private val packetTypes: Map<Class<*>, String>
+    private val entityClasses: Map<Any, Class<*>>
+    private val entityDataSerializers: Map<Any, String>
+
+    init {
+        packetTypes = mapOf(
+            Pair(
+                Class.forName(
+                    classRemapper.getClass("net/minecraft/world/entity/player/Player")?.original
+                        ?: throw RuntimeException("Could not remap class net/minecraft/world/entity/player/Player"),
+                    true,
+                    jarReader.classLoader
+                ),
+                "PLAYER"
+            ),
+            Pair(
+                Class.forName(
+                    classRemapper.getClass("net/minecraft/world/entity/LivingEntity")?.original
+                        ?: throw RuntimeException("Could not remap class net/minecraft/world/entity/LivingEntity"),
+                    true,
+                    jarReader.classLoader
+                ),
+                "LIVING"
+            ),
+            Pair(
+                Class.forName(
+                    classRemapper.getClass("net/minecraft/world/entity/decoration/Painting")?.original
+                        ?: throw RuntimeException("Could not remap class net/minecraft/world/entity/decoration/Painting"),
+                    true,
+                    jarReader.classLoader
+                ),
+                "PAINTING"
+            ),
+            Pair(
+                Class.forName(
+                    classRemapper.getClass("net/minecraft/world/entity/ExperienceOrb")?.original
+                        ?: throw RuntimeException("Could not remap class net/minecraft/world/entity/ExperienceOrb"),
+                    true,
+                    jarReader.classLoader
+                ),
+                "EXPERIENCE_ORB"
+            )
+        )
+        // EntityType.class
+        val entityTypeClass: Class<*> = Class.forName(
+            classRemapper.getClass("net/minecraft/world/entity/EntityType")?.original
+                ?: throw RuntimeException("Could not remap class net/minecraft/world/entity/EntityType"),
+            true,
+            jarReader.classLoader
+        )
+        entityClasses = Arrays.stream(entityTypeClass.declaredFields)
+            .map { field ->
+                if (!entityTypeClass.isAssignableFrom(field.type)) {
+                    return@map null
+                }
+                return@map Pair(field.get(null), (field.genericType as ParameterizedType).actualTypeArguments[0] as Class<*>)
+            }
+            .toList()
+            .filterNotNull()
+            .associateBy({ it.first }, { it.second })
+        // EntityDataSerializers.class
+        val eds1Class: Class<*> = Class.forName(
+            classRemapper.getClass("net/minecraft/network/syncher/EntityDataSerializers")?.original
+                ?: throw RuntimeException("Could not remap class net/minecraft/network/syncher/EntityDataSerializers"),
+            true,
+            jarReader.classLoader
+        )
+        // EntityDataSerializer.class
+        val eds2Class: Class<*> = Class.forName(
+            classRemapper.getClass("net/minecraft/network/syncher/EntityDataSerializer")?.original
+                ?: throw RuntimeException("Could not remap class net/minecraft/network/syncher/EntityDataSerializer"),
+            true,
+            jarReader.classLoader
+        )
+        entityDataSerializers = Arrays.stream(eds1Class.declaredFields)
+            .map { field ->
+                if (!eds2Class.isAssignableFrom(field.type)) {
+                    return@map null
+                }
+                return@map Pair(
+                    field.get(null),
+                    classRemapper.remapField(eds1Class.name, field.name)?.mapped
+                        ?: throw RuntimeException("Could not remap field " + field.name + " of class net/minecraft/network/syncher/EntityDataSerializers")
+                )
+            }
+            .toList()
+            .filterNotNull()
+            .associateBy({ it.first }, { it.second })
+    }
+
     override fun generate(): Array<EntityType> {
-        Thread.currentThread().contextClassLoader = jarReader.classLoader
         // Registry.class
         val registryClass: Class<*> = Class.forName(
             classRemapper.getClass("net/minecraft/core/Registry")?.original
@@ -59,8 +147,6 @@ class FlatteningEntityTypeGenerator(
             jarReader.classLoader
         )
         val entityTypes: MutableList<EntityType> = mutableListOf()
-        val entityDataSerializers: Map<Any, String> = entityDataSerializers()
-        val entityClasses: Map<Any, Class<*>> = entityClasses()
         for (entityResourceLocation: Any in resourceSet) {
             // Registry.ENTITY_TYPE.get(entityResourceLocation) (EntityType<?>)
             val entityType: Any = entityTypeRegistry.javaClass.getMethod(
@@ -79,6 +165,7 @@ class FlatteningEntityTypeGenerator(
                     ).invoke(entityTypeRegistry, entityType) as Int,
                     entityTypeInstances[entityType] ?: throw RuntimeException("Missing entityType $entityType"),
                     entityResourceLocation.toString(),
+                    findPacketType(entityClass),
                     // entityType.fireImmune() (boolean)
                     classRemapper.getMethod("net/minecraft/world/entity/EntityType", "fireImmune")?.original.let {
                         if (it != null) entityType.javaClass.getMethod(it).invoke(entityType) as Boolean else null
@@ -139,47 +226,11 @@ class FlatteningEntityTypeGenerator(
         return entityTypes.toTypedArray()
     }
 
-    private fun entityDataSerializers(): Map<Any, String> {
-        val names: MutableMap<Any, String> = mutableMapOf()
-        // EntityDataSerializers.class
-        val eds1Class: Class<*> = Class.forName(
-            classRemapper.getClass("net/minecraft/network/syncher/EntityDataSerializers")?.original
-                ?: throw RuntimeException("Could not remap class net/minecraft/network/syncher/EntityDataSerializers"),
-            true,
-            jarReader.classLoader
-        )
-        // EntityDataSerializer.class
-        val eds2Class: Class<*> = Class.forName(
-            classRemapper.getClass("net/minecraft/network/syncher/EntityDataSerializer")?.original
-                ?: throw RuntimeException("Could not remap class net/minecraft/network/syncher/EntityDataSerializer"),
-            true,
-            jarReader.classLoader
-        )
-        for (field: Field in eds1Class.declaredFields) {
-            if (!eds2Class.isAssignableFrom(field.type)) {
-                continue
-            }
-            names[field.get(null)] = classRemapper.remapField(eds1Class.name, field.name)?.mapped
-                ?: throw RuntimeException("Could not remap field " + field.name + " of class net/minecraft/network/syncher/EntityDataSerializers")
-        }
-        return names
-    }
-
-    private fun entityClasses(): Map<Any, Class<*>> {
-        val classes: MutableMap<Any, Class<*>> = mutableMapOf()
-        // EntityType.class
-        val entityTypeClass: Class<*> = Class.forName(
-            classRemapper.getClass("net/minecraft/world/entity/EntityType")?.original
-                ?: throw RuntimeException("Could not remap class net/minecraft/world/entity/EntityType"),
-            true,
-            jarReader.classLoader
-        )
-        for (field: Field in entityTypeClass.declaredFields) {
-            if (!entityTypeClass.isAssignableFrom(field.type)) {
-                continue
-            }
-            classes[field.get(null)] = (field.genericType as ParameterizedType).actualTypeArguments[0] as Class<*>
-        }
-        return classes
+    private fun findPacketType(entityClass: Class<*>): String {
+        return packetTypes.entries.stream()
+            .filter { it.key.isAssignableFrom(entityClass) }
+            .findFirst()
+            .map { it.value }
+            .orElse("BASE")
     }
 }

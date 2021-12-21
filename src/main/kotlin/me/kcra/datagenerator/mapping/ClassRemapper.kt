@@ -87,10 +87,18 @@ class ClassRemapper(
                 refMapping.intermediary.getClass(getMappedClass(refMapping.mojang, mapped)?.original).mapped
             )
         }
-        return getMappedClass(
+        val refClass: IMappingFile.IClass = refMapping.searge.getClass(getMappedClass(refMapping.mojang, mapped)?.original)
+        val result: IMappingFile.IClass? = getMappedClass(
             mapping.searge,
-            refMapping.searge.getClass(getMappedClass(refMapping.mojang, mapped)?.original).mapped
+            refClass.mapped
         )
+        // 1.14> searge entity class name inconsistency fix
+        if (result == null && isSeargeEntityClassNew(refClass.mapped)) {
+            val classParts: MutableList<String> = ArrayList(refClass.mapped.split("/"))
+            classParts[classParts.lastIndex] = "Entity" + classParts.last().replaceFirst("Entity", "")
+            return getMappedClassPkgInsensitive(mapping.searge, classParts.joinToString("/"))
+        }
+        return result
     }
 
     fun remapClass(obf: String): IMappingFile.IClass? {
@@ -233,13 +241,19 @@ class ClassRemapper(
         val seargeField: IMappingFile.IField? = seargeClass.getField(field)
         var seargeVClass: IMappingFile.IClass? = getMappedClass(refMappingLocal.searge, seargeClass.mapped)
         // 1.14> searge entity class name inconsistency fix
-        if (seargeVClass == null && seargeClass.mapped.startsWith("net/minecraft/entity")
-            && seargeClass.mapped.substring(seargeClass.mapped.lastIndexOf('/') + 1).startsWith("Entity")
-        ) {
-            seargeVClass = getMappedClassPkgInsensitive(refMappingLocal.searge, seargeClass.mapped.replace("Entity", "") + "Entity")
+        if (seargeVClass == null && isSeargeEntityClassOld(seargeClass.mapped)) {
+            seargeVClass = getMappedClassPkgInsensitive(refMappingLocal.searge, seargeClass.mapped.replaceFirst("Entity", "") + "Entity")
         }
         val seargeVField: IMappingFile.IField? =
             seargeVClass?.let { seargeField?.let { it1 -> getMappedField(it, it1.mapped) } }
         return refMappingLocal.mojang.getClass(seargeVClass?.original)?.getField(seargeVField?.original) ?: if (refMapping2 != null && firstRemapping) remapField(cls, field, refMapping2, false) else null
+    }
+
+    private fun isSeargeEntityClassOld(mapped: String): Boolean {
+        return mapped.startsWith("net/minecraft/entity") && mapped.substring(mapped.lastIndexOf('/') + 1).startsWith("Entity")
+    }
+
+    private fun isSeargeEntityClassNew(mapped: String): Boolean {
+        return mapped.startsWith("net/minecraft/entity") && mapped.substring(mapped.lastIndexOf('/') + 1).endsWith("Entity")
     }
 }
