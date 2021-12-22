@@ -109,16 +109,6 @@ fun main(args: Array<String>) {
     } catch (ignored: Exception) {
         // ignored
     }
-    // SharedConstants.IS_RUNNING_IN_IDE = true
-    Class.forName(
-        classRemapper.getClass("net/minecraft/SharedConstants")?.original
-            ?: throw RuntimeException("Could not remap class net/minecraft/SharedConstants"),
-        true,
-        minecraftJarReader.classLoader
-    ).getDeclaredField(
-        classRemapper.getField("net/minecraft/SharedConstants", "IS_RUNNING_IN_IDE")?.original
-            ?: throw RuntimeException("Could not remap field IS_RUNNING_IN_IDE of class net/minecraft/SharedConstants")
-    ).set(null, true)
 
     // Bootstrap.bootStrap()
     Class.forName(
