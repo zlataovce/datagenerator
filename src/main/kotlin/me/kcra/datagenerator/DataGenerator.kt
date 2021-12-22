@@ -109,29 +109,31 @@ fun main(args: Array<String>) {
     } catch (ignored: Exception) {
         // ignored
     }
-    // Bootstrap.class
-    val bootstrapClass: Class<*> = Class.forName(
+    // SharedConstants.IS_RUNNING_IN_IDE = true
+    Class.forName(
+        classRemapper.getClass("net/minecraft/SharedConstants")?.original
+            ?: throw RuntimeException("Could not remap class net/minecraft/SharedConstants"),
+        true,
+        minecraftJarReader.classLoader
+    ).getDeclaredField(
+        classRemapper.getField("net/minecraft/SharedConstants", "IS_RUNNING_IN_IDE")?.original
+            ?: throw RuntimeException("Could not remap field IS_RUNNING_IN_IDE of class net/minecraft/SharedConstants")
+    ).set(null, true)
+
+    // Bootstrap.bootStrap()
+    Class.forName(
         classRemapper.getClass("net/minecraft/server/Bootstrap")?.original
             ?: throw RuntimeException("Could not remap class net/minecraft/server/Bootstrap"),
         true,
         minecraftJarReader.classLoader
-    )
-    // Bootstrap.bootStrap()
-    bootstrapClass.getDeclaredMethod(
-        classRemapper.getMethod("net/minecraft/server/Bootstrap", "bootStrap")?.original
+    ).getDeclaredMethod(
+        classRemapper.getMethod("net/minecraft/server/Bootstrap", "bootStrap", "()Z")?.original
+            ?: classRemapper.getMethod("net/minecraft/server/Bootstrap", "bootStrap", "()V")?.original
             ?: throw RuntimeException("Could not remap method bootStrap of class net/minecraft/server/Bootstrap")
     ).invoke(null)
     // making minecraft's slf4j stfu
     System.setOut(PrintStream(FileOutputStream(FileDescriptor.out)))
     System.setErr(PrintStream(FileOutputStream(FileDescriptor.err)))
-    // Bootstrap.isBootstrapped
-    val isBootstrappedField: Field = bootstrapClass.getDeclaredField(
-        classRemapper.getField("net/minecraft/server/Bootstrap", "isBootstrapped")?.original
-            ?: throw RuntimeException("Could not remap field isBootstrapped of class net/minecraft/server/Bootstrap")
-    )
-    isBootstrappedField.trySetAccessible()
-    println("Is bootstrapped: " + isBootstrappedField.get(null) as Boolean)
-    isBootstrappedField.set(null, true)
 
     val generators: List<AbstractGenerator<*>> = mutableListOf<AbstractGenerator<*>>(
         EntityDataSerializerGenerator(mapper, classRemapper, minecraftJarReader)

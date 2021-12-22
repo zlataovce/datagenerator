@@ -26,7 +26,7 @@ class ClassRemapper(
         val override: Optional<MappingOverride> = overrides.stream()
             .filter {
                 currentVersion.isBetween(it.versions.minVersion, it.versions.maxVersion)
-                        && !refVersion.isBetween(it.versions.minVersion, it.versions.maxVersion)
+                        // && !refVersion.isBetween(it.versions.minVersion, it.versions.maxVersion)
                         && it.new == mapped && it.type == type
             }
             .findFirst()
@@ -246,6 +246,9 @@ class ClassRemapper(
         }
         val seargeClass: IMappingFile.IClass = mapping.searge.getClass(cls)
         val seargeField: IMappingFile.IField? = seargeClass.getField(field)
+        if (cls == "bcs") {
+            println("mapped class")
+        }
         var seargeVClass: IMappingFile.IClass? = getMappedClass(refMappingLocal.searge, seargeClass.mapped)
         // 1.14> searge entity class name inconsistency fix
         if (seargeVClass == null && isSeargeEntityClassOld(seargeClass.mapped)) {
@@ -253,6 +256,12 @@ class ClassRemapper(
         }
         val seargeVField: IMappingFile.IField? =
             seargeVClass?.let { seargeField?.let { it1 -> getMappedField(it, it1.mapped) } }
+        if (cls == "bcs") {
+            println(seargeField)
+            println(seargeVField)
+            println(seargeClass)
+            println(seargeVClass)
+        }
         return refMappingLocal.mojang.getClass(seargeVClass?.original)?.getField(seargeVField?.original) ?: if (refMapping2 != null && firstRemapping) remapField(cls, field, refMapping2, false) else null
     }
 

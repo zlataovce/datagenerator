@@ -39,19 +39,13 @@ class FlatteningBlockTypeGenerator(
             true,
             jarReader.classLoader
         )
-        val blocksClass: Class<*>
-        try {
-            // Blocks.class
-            blocksClass = Class.forName(
-                classRemapper.getClass("net/minecraft/world/level/block/Blocks")?.original
-                    ?: throw RuntimeException("Could not remap class net/minecraft/world/level/block/Blocks"),
-                true,
-                jarReader.classLoader
-            )
-        } catch (ignored: NoClassDefFoundError) {
-            // TODO: fix the class
-            throw RuntimeException("Failed loading class net/minecraft/world/level/block/Blocks, most likely obfuscation with illegal names")
-        }
+        // Blocks.class
+        val blocksClass: Class<*> = Class.forName(
+            classRemapper.getClass("net/minecraft/world/level/block/Blocks")?.original
+                ?: throw RuntimeException("Could not remap class net/minecraft/world/level/block/Blocks"),
+            true,
+            jarReader.classLoader
+        )
         // Block fields from the Blocks class
         val blockInstances: Map<Any, String> = Arrays.stream(blocksClass.declaredFields)
             .filter { blockClass.isAssignableFrom(it.type) }
