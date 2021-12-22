@@ -167,25 +167,15 @@ class FlatteningEntityTypeGenerator(
                     entityResourceLocation.toString(),
                     findPacketType(entityClass),
                     // entityType.fireImmune() (boolean)
-                    classRemapper.getMethod("net/minecraft/world/entity/EntityType", "fireImmune")?.original.let {
-                        if (it != null) entityType.javaClass.getMethod(it).invoke(entityType) as Boolean else null
-                    },
+                    invokeEntityTypeMethodNullable(entityType, "fireImmune") as Boolean?,
                     // entityType.getHeight() (float)
-                    classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getHeight")?.original.let {
-                        if (it != null) entityType.javaClass.getMethod(it).invoke(entityType) as Float else null
-                    },
+                    invokeEntityTypeMethodNullable(entityType, "getHeight") as Float?,
                     // entityType.getWidth() (float)
-                    classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getWidth")?.original.let {
-                        if (it != null) entityType.javaClass.getMethod(it).invoke(entityType) as Float else null
-                    },
+                    invokeEntityTypeMethodNullable(entityType, "getWidth") as Float?,
                     // entityType.clientTrackingRange() (int)
-                    classRemapper.getMethod("net/minecraft/world/entity/EntityType", "clientTrackingRange")?.original.let {
-                        if (it != null) entityType.javaClass.getMethod(it).invoke(entityType) as Int else null
-                    },
+                    invokeEntityTypeMethodNullable(entityType, "clientTrackingRange") as Int?,
                     // entityType.getDefaultLootTable() (ResourceLocation)
-                    classRemapper.getMethod("net/minecraft/world/entity/EntityType", "getDefaultLootTable")?.original.let {
-                        if (it != null) entityType.javaClass.getMethod(it).invoke(entityType).toString() else null
-                    },
+                    invokeEntityTypeMethodNullable(entityType, "getDefaultLootTable").toString(),
                     Arrays.stream(entityClass.declaredFields)
                         .map { field ->
                             if (!entityDataAccessorClass.isAssignableFrom(field.type)) {
@@ -232,5 +222,11 @@ class FlatteningEntityTypeGenerator(
             .findFirst()
             .map { it.value }
             .orElse("BASE")
+    }
+
+    private fun invokeEntityTypeMethodNullable(entityType: Any, methodName: String): Any? {
+        return classRemapper.getMethod("net/minecraft/world/entity/EntityType", methodName)?.original.let {
+            if (it != null) entityType.javaClass.getMethod(it).invoke(entityType) else null
+        }
     }
 }

@@ -72,10 +72,37 @@ class FlatteningBlockTypeGenerator(
                         Object::class.java
                     ).invoke(blockRegistry, block) as Int,
                     blockInstances[block] ?: throw RuntimeException("Missing block $block"),
-                    blockResourceLocation.toString()
+                    blockResourceLocation.toString(),
+                    // block.getExplosionResistance() (float)
+                    invokeBlockMethod(block, "getExplosionResistance") as Float,
+                    // block.getFriction() (float)
+                    invokeBlockMethod(block, "getFriction") as Float,
+                    // block.getSpeedFactor() (float)
+                    invokeBlockMethodNullable(block, "getSpeedFactor") as Float?,
+                    // block.getJumpFactor() (float)
+                    invokeBlockMethodNullable(block, "getJumpFactor") as Float?,
+                    // block.hasDynamicShape() (boolean)
+                    invokeBlockMethod(block, "hasDynamicShape") as Boolean,
+                    // block.getLootTable() (ResourceLocation)
+                    classRemapper.getMethod("net/minecraft/world/level/block/state/BlockBehaviour", "getLootTable")?.original.let {
+                        if (it != null) block.javaClass.getMethod(it).invoke(block).toString() else null
+                    }
                 )
             )
         }
         return blockTypes.toTypedArray()
+    }
+
+    private fun invokeBlockMethod(block: Any, methodName: String): Any? {
+        return block.javaClass.getMethod(
+            classRemapper.getMethod("net/minecraft/world/level/block/Block", methodName)?.original
+                ?: throw RuntimeException("Could not remap method $methodName of class net/minecraft/world/level/block/Block")
+        ).invoke(block)
+    }
+
+    private fun invokeBlockMethodNullable(block: Any, methodName: String): Any? {
+        return classRemapper.getMethod("net/minecraft/world/level/block/Block", methodName)?.original.let {
+            if (it != null) block.javaClass.getMethod(it).invoke(block) else null
+        }
     }
 }
