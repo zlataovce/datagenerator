@@ -90,5 +90,11 @@
     "new": "net/minecraft/entity/item/ExperienceOrbEntity",
     "old": "net/minecraft/entity/item/EntityXPOrb",
     "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/block/Blocks",
+    "old": "net/minecraft/init/Blocks",
+    "versions": "1.9.4->1.13.2"
   }
 ]

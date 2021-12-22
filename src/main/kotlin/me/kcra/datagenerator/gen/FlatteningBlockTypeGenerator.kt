@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import me.kcra.datagenerator.gen.model.BlockType
 import me.kcra.datagenerator.mapping.ClassRemapper
 import me.kcra.datagenerator.utils.MinecraftJarReader
+import java.util.*
 
 class FlatteningBlockTypeGenerator(
     jsonMapper: ObjectMapper,
@@ -38,6 +39,27 @@ class FlatteningBlockTypeGenerator(
             true,
             jarReader.classLoader
         )
+        val blocksClass: Class<*>
+        try {
+            // Blocks.class
+            blocksClass = Class.forName(
+                classRemapper.getClass("net/minecraft/world/level/block/Blocks")?.original
+                    ?: throw RuntimeException("Could not remap class net/minecraft/world/level/block/Blocks"),
+                true,
+                jarReader.classLoader
+            )
+        } catch (ignored: NoClassDefFoundError) {
+            // TODO: fix the class
+            throw RuntimeException("Failed loading class net/minecraft/world/level/block/Blocks, most likely obfuscation with illegal names")
+        }
+        // Block fields from the Blocks class
+        val blockInstances: Map<Any, String> = Arrays.stream(blocksClass.declaredFields)
+            .filter { blockClass.isAssignableFrom(it.type) }
+            .toList()
+            .associateBy({ it.get(null) }, {
+                classRemapper.remapField(blocksClass.name, it.name)?.mapped
+                    ?: throw RuntimeException("Could not remap field " + it.name + " of class net/minecraft/world/level/block/Blocks")
+            })
 
         val blockTypes: MutableList<BlockType> = mutableListOf()
         for (blockResourceLocation: Any in resourceSet) {
@@ -47,7 +69,18 @@ class FlatteningBlockTypeGenerator(
                     ?: throw RuntimeException("Could not remap method get of class net/minecraft/core/Registry"),
                 Class.forName(classRemapper.getClass("net/minecraft/resources/ResourceLocation")?.original, true, jarReader.classLoader)
             ).invoke(blockRegistry, blockResourceLocation)
-            TODO("implement this")
+            blockTypes.add(
+                BlockType(
+                    // Registry.ENTITY_TYPE.getId(entityType) (int)
+                    blockRegistry.javaClass.getMethod(
+                        classRemapper.getMethod("net/minecraft/core/Registry", "getId", "(Ljava/lang/Object;)I")?.original
+                            ?: throw RuntimeException("Could not remap method getId of class net/minecraft/core/Registry"),
+                        Object::class.java
+                    ).invoke(blockRegistry, block) as Int,
+                    blockInstances[block] ?: throw RuntimeException("Missing block $block"),
+                    blockResourceLocation.toString()
+                )
+            )
         }
         return blockTypes.toTypedArray()
     }

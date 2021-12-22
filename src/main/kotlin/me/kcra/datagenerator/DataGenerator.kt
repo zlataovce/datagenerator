@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import me.kcra.datagenerator.gen.AbstractGenerator
 import me.kcra.datagenerator.gen.EntityDataSerializerGenerator
+import me.kcra.datagenerator.gen.FlatteningBlockTypeGenerator
 import me.kcra.datagenerator.gen.FlatteningEntityTypeGenerator
 import me.kcra.datagenerator.mapping.ClassRemapper
 import me.kcra.datagenerator.mapping.MappingSet
@@ -137,6 +138,7 @@ fun main(args: Array<String>) {
     ).also {
         if (version.isNewerThan(1, 13, 0, null)) {
             it.add(FlatteningEntityTypeGenerator(mapper, classRemapper, minecraftJarReader))
+            it.add(FlatteningBlockTypeGenerator(mapper, classRemapper, minecraftJarReader))
         }
     }
     Path.of(System.getProperty("user.dir"), "generated").toAbsolutePath().toFile().mkdirs()
