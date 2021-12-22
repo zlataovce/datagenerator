@@ -12,4 +12,5 @@ Generated files will be in the `generated` folder.
 
 ## Data
 * `EntityDataSerializers` - 1.9.4 to the latest
-* `FlatteningEntityTypes` - 1.13.1 to the latest
+* `EntityTypes` - 1.13.1 to the latest
+* `Blocks` - 1.13.1 to the latest

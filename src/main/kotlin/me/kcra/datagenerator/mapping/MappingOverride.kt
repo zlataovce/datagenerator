@@ -7,5 +7,6 @@ data class MappingOverride(
     val type: String,
     val new: String,
     val old: String,
-    val versions: Version.VersionRange
+    val versions: Version.VersionRange,
+    var reversable: Boolean = false
 )

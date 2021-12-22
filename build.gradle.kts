@@ -8,15 +8,14 @@ version = project.properties["datagenerator.version"] as String
 
 repositories {
     mavenCentral()
-    maven("https://repo.screamingsandals.org/snapshots")
+    maven("https://repo.screamingsandals.org/public")
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("commons-cli:commons-cli:1.5.0")
     implementation("org.ow2.asm:asm:9.2")
-    implementation("org.ow2.asm:asm-commons:9.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
     implementation("net.minecraftforge:srgutils:0.4.11-SNAPSHOT")
 }
 

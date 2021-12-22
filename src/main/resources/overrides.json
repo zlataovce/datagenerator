@@ -95,6 +95,13 @@
     "type": "class",
     "new": "net/minecraft/block/Blocks",
     "old": "net/minecraft/init/Blocks",
+    "versions": "1.9.4->1.13.2",
+    "reversable": true
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/entity/item/EntityMinecartFurnace",
+    "old": "net/minecraft/entity/item/minecart/FurnaceMinecartEntity",
     "versions": "1.9.4->1.13.2"
   }
 ]
