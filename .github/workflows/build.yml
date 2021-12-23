@@ -38,5 +38,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: |
-            build/libs/datagenerator-${{ steps.read_property.outputs.value }}-all.jar
-            generated/
+            build/libs/*
+            generated/*
