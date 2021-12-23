@@ -53,17 +53,24 @@ val dataVersions: List<String> = listOf(
     "1.13.2",
     "1.13.1"
 )
+val jarFile: String = tasks.getByName<ShadowJar>("shadowJar").archiveFile.get().asFile.path
 
 tasks.register("generateData") {
-    dependsOn("shadowJar")
-    val jarFile: String = tasks.getByName<ShadowJar>("shadowJar").archiveFile.get().asFile.path
-    for (ver: String in dataVersions) {
-        doLast {
-            println("Generating data for version $ver...")
-            javaexec {
-                mainClass.set("-jar")
-                args(jarFile, "-v", ver)
-            }
-        }
+    dependsOn(
+        dataVersions.stream()
+            .map { "generateVersion$it" }
+            .toArray()
+    )
+    description = "Generates data for all datable versions."
+    group = "generation"
+}
+
+for (ver: String in dataVersions) {
+    tasks.register("generateVersion$ver", JavaExec::class) {
+        dependsOn("shadowJar")
+        description = "Generates data for the $ver version."
+        group = "generation"
+        mainClass.set("-jar")
+        args(jarFile, "-v", ver)
     }
 }
