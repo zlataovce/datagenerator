@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     kotlin("jvm") version "1.6.10"
     id("com.github.johnrengelman.shadow") version "7.1.1"
@@ -27,4 +29,41 @@ tasks.withType<Jar> {
 
 configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor(0, "seconds")
+}
+
+val dataVersions: List<String> = listOf(
+    "1.18.1",
+    "1.18",
+    "1.17.1",
+    "1.17",
+    "1.16.5",
+    "1.16.4",
+    "1.16.3",
+    "1.16.2",
+    "1.16.1",
+    "1.16",
+    "1.15.2",
+    "1.15.1",
+    "1.15",
+    "1.14.4",
+    "1.14.3",
+    "1.14.2",
+    "1.14.1",
+    "1.14",
+    "1.13.2",
+    "1.13.1"
+)
+
+tasks.register("generateData") {
+    dependsOn("shadowJar")
+    val jarFile: String = tasks.getByName<ShadowJar>("shadowJar").archiveFile.get().asFile.path
+    for (ver: String in dataVersions) {
+        doLast {
+            println("Generating data for version $ver...")
+            javaexec {
+                mainClass.set("-jar")
+                args(jarFile, "-v", ver)
+            }
+        }
+    }
 }
