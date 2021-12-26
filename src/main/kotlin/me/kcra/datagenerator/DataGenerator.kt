@@ -23,9 +23,6 @@ import java.lang.reflect.Field
 import java.nio.file.Path
 
 fun main(args: Array<String>) {
-    val tmpPath: Path = Path.of(System.getProperty("user.dir"), "work").toAbsolutePath()
-    tmpPath.toFile().mkdirs()
-    System.setProperty("java.io.tmpdir", tmpPath.toString())
     val opts: Options = Options()
         .addRequiredOption("v", "version", true, "Version for extraction")
         .addOption("r", "ref", true, "Reference mapping version (needs Mojang mappings)")
@@ -40,6 +37,7 @@ fun main(args: Array<String>) {
     val version = Version(cmd.getOptionValue("v"))
     val refVersion = Version(cmd.getOptionValue("r", "1.16.5"))
     val refVersion2 = Version(cmd.getOptionValue("r2", "1.14.4"))
+    Workspace.createWorkspace(version)
 
     val mapper: ObjectMapper = jacksonObjectMapper()
     println("Retrieving Minecraft server JAR...")

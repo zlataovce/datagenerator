@@ -5,24 +5,47 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLConnection
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.*
+import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 fun getFromURL(url: String): File? {
-    val file: Path = Files.createTempFile("downloaded_file", null)
-    try {
-        URL(url).openStream().use { inputStream ->
-            Files.copy(inputStream, file, StandardCopyOption.REPLACE_EXISTING)
+    val file: File = Workspace.currentWorkspace?.createFile(url.substring(url.lastIndexOf('/') + 1))
+        ?: throw RuntimeException("Current workspace is not set")
+    if (!file.isFile || file.length() != getContentLength(URL(url))) {
+        try {
+            URL(url).openStream().use { inputStream ->
+                Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
+        } catch (ignored: Exception) {
+            return null
         }
-    } catch (ignored: Exception) {
-        return null
     }
-    return file.toFile()
+    return file
+}
+
+private fun getContentLength(url: URL): Long {
+    var conn: URLConnection? = null
+    try {
+        conn = url.openConnection()
+        if (conn is HttpURLConnection) {
+            conn.requestMethod = "HEAD"
+        }
+        return conn.contentLengthLong
+    } catch (e: IOException) {
+        throw RuntimeException(e)
+    } finally {
+        if (conn != null && conn is HttpURLConnection) {
+            conn.disconnect()
+        }
+    }
 }
 
 fun minecraftResource(mapper: ObjectMapper, version: String, res: String): File? {
@@ -73,4 +96,8 @@ fun unzip(zipFile: ZipFile, dest: File): File {
         Files.copy(zipFile.getInputStream(entry), entryFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
     }
     return dest
+}
+
+fun verifyChecksum(entry: ZipEntry, file: Path): Boolean {
+    return CRC32().also { it.update(Files.readAllBytes(file)) }.value == entry.crc
 }

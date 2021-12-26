@@ -6,6 +6,7 @@ import java.net.URL
 import java.net.URLClassLoader
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 class MinecraftJarReader(file: File, version: String) {
@@ -16,14 +17,19 @@ class MinecraftJarReader(file: File, version: String) {
         val currentFile = ZipFile(file)
         if (currentFile.getEntry("net/minecraft/bundler/Main.class") != null) {
             println("Detected bundler JAR!")
-            val bundledJar: File = File.createTempFile("bundled_file", ".jar")
-            Files.copy(
-                currentFile.getInputStream(currentFile.getEntry("META-INF/versions/$version/server-$version.jar")),
-                bundledJar.toPath(),
-                StandardCopyOption.REPLACE_EXISTING
-            )
+            val bundledJar: File = Workspace.currentWorkspace?.createFile("bundled.jar")
+                ?: throw RuntimeException("Current workspace is not set")
+            val bundledEntry: ZipEntry = currentFile.getEntry("META-INF/versions/$version/server-$version.jar")
+            if (!bundledJar.isFile || !verifyChecksum(bundledEntry, bundledJar.toPath())) {
+                Files.copy(
+                    currentFile.getInputStream(bundledEntry),
+                    bundledJar.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+            }
             zip = ZipFile(bundledJar)
-            val extractedJar: File = Files.createTempDirectory("extracted_jar").toFile()
+            val extractedJar: File = Workspace.currentWorkspace?.createDirectory("extracted")
+                ?: throw RuntimeException("Current workspace is not set")
             println("Unzipping Minecraft server JAR...")
             unzip(currentFile, extractedJar)
             classLoader = URLClassLoader.newInstance(
