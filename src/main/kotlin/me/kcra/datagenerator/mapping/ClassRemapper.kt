@@ -99,7 +99,8 @@ class ClassRemapper(
                 refMapping.intermediary.getClass(refMapping.mojang.getMappedClass(mapped)?.original).mapped
             )
         }
-        val refClass: IMappingFile.IClass = refMapping.searge.getClass(refMapping.mojang.getMappedClass(mapped)?.original)
+        val refClass: IMappingFile.IClass =
+            refMapping.searge.getClass(refMapping.mojang.getMappedClass(mapped)?.original)
         val result: IMappingFile.IClass? = mapping.searge.getMappedClass(refClass.mapped)
         // 1.14> searge entity class name inconsistency fix
         if (result == null && isSeargeEntityClassNew(refClass.mapped)) {
@@ -111,21 +112,35 @@ class ClassRemapper(
     }
 
     fun remapClass(obf: String): IMappingFile.IClass? {
+        return remapClass(refMapping, obf, true)
+    }
+
+    private fun remapClass(refMappingLocal: MappingSet, obf: String, firstRemapping: Boolean): IMappingFile.IClass? {
         if (mapping == null) {
-            return refMapping.mojang.getClass(obf)
+            return refMappingLocal.mojang.getClass(obf)
         }
         if (mapping.intermediary != null) {
-            return refMapping.mojang.getClass(
-                refMapping.intermediary.getMappedClass(
+            return refMappingLocal.mojang.getClass(
+                refMappingLocal.intermediary.getMappedClass(
                     mapping.intermediary.getClass(obf).mapped
                 )?.original
+            ) ?: if (refMapping2 != null && firstRemapping) remapClass(refMapping2, obf, false) else null
+        }
+        val seargeClass: IMappingFile.IClass = mapping.searge.getClass(obf)
+        var seargeVClass: IMappingFile.IClass? = refMappingLocal.searge.getMappedClass(seargeClass.mapped)
+        // 1.14> searge packet class name inconsistency fix
+        if (seargeVClass == null && (isSeargeServerPacketClassOld(seargeClass.mapped) || isSeargeClientPacketClassOld(seargeClass.mapped))) {
+            val packetTypeLetter: Char = if (isSeargeServerPacketClassOld(seargeClass.mapped)) 'S' else 'C'
+            val originalClass: String = seargeClass.mapped.substring(seargeClass.mapped.lastIndexOf('/') + 1)
+                .let { if (it.contains('$')) it.substring(0, it.lastIndexOf('$')) else it }
+            val fixedClass: String = packetTypeLetter + originalClass.replaceFirst("${packetTypeLetter}Packet", "") + "Packet"
+            seargeVClass = refMappingLocal.searge.getMappedClassPkgInsensitive(
+                fixedClass + (if (seargeClass.mapped.contains('$')) "$" + seargeClass.mapped.substring(seargeClass.mapped.lastIndexOf('$') + 1) else "")
             )
         }
-        return refMapping.mojang.getClass(
-            refMapping.searge.getMappedClass(
-                mapping.searge.getClass(obf).mapped
-            )?.original
-        )
+        return refMappingLocal.mojang.getClass(
+            seargeVClass?.original
+        ) ?: if (refMapping2 != null && firstRemapping) remapClass(refMapping2, obf, false) else null
     }
 
     fun getMethod(cls: String, method: String, descriptor: String): IMappingFile.IMethod? {
@@ -269,6 +284,16 @@ class ClassRemapper(
                 seargeClass.mapped.replaceFirst("Entity", "") + "Entity"
             )
         }
+        // 1.14> searge packet class name inconsistency fix
+        if (seargeVClass == null && (isSeargeServerPacketClassOld(seargeClass.mapped) || isSeargeClientPacketClassOld(seargeClass.mapped))) {
+            val packetTypeLetter: Char = if (isSeargeServerPacketClassOld(seargeClass.mapped)) 'S' else 'C'
+            val originalClass: String = seargeClass.mapped.substring(seargeClass.mapped.lastIndexOf('/') + 1)
+                .let { if (it.contains('$')) it.substring(0, it.lastIndexOf('$')) else it }
+            val fixedClass: String = packetTypeLetter + originalClass.replaceFirst("${packetTypeLetter}Packet", "") + "Packet"
+            seargeVClass = refMappingLocal.searge.getMappedClassPkgInsensitive(
+                fixedClass + (if (seargeClass.mapped.contains('$')) "$" + seargeClass.mapped.substring(seargeClass.mapped.lastIndexOf('$') + 1) else "")
+            )
+        }
         val seargeVField: IMappingFile.IField? =
             seargeVClass?.let { seargeField?.let { it1 -> it.getMappedField(it1.mapped) } }
         return refMappingLocal.mojang.getClass(seargeVClass?.original)?.getField(seargeVField?.original)
@@ -283,6 +308,16 @@ class ClassRemapper(
     private fun isSeargeEntityClassNew(mapped: String): Boolean {
         return mapped.startsWith("net/minecraft/entity") && mapped.substring(mapped.lastIndexOf('/') + 1)
             .endsWith("Entity")
+    }
+
+    private fun isSeargeServerPacketClassOld(mapped: String): Boolean {
+        return mapped.startsWith("net/minecraft/network") && mapped.substring(mapped.lastIndexOf('/') + 1)
+            .startsWith("SPacket")
+    }
+
+    private fun isSeargeClientPacketClassOld(mapped: String): Boolean {
+        return mapped.startsWith("net/minecraft/network") && mapped.substring(mapped.lastIndexOf('/') + 1)
+            .startsWith("CPacket")
     }
 
     private fun newField(original: String, mapped: String): IMappingFile.IField {

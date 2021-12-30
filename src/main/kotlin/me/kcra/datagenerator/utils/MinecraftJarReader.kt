@@ -2,6 +2,7 @@ package me.kcra.datagenerator.utils
 
 import org.objectweb.asm.ClassReader
 import java.io.File
+import java.io.InputStream
 import java.net.URL
 import java.net.URLClassLoader
 import java.nio.file.Files
@@ -49,6 +50,16 @@ class MinecraftJarReader(file: File, version: String) {
             )
         }
         println("Loaded Minecraft server classes.")
+    }
+
+    fun minecraftClasses(): Map<String, InputStream> {
+        val classes: MutableMap<String, InputStream> = mutableMapOf()
+        for (clazz: ZipEntry in zip.entries()) {
+            if (clazz.name.endsWith(".class") && !clazz.name.contains('/')) {
+                classes[clazz.name.substring(0, clazz.name.lastIndexOf('.'))] = zip.getInputStream(clazz)
+            }
+        }
+        return classes
     }
 
     fun readClass(path: String): ClassReader {

@@ -103,5 +103,301 @@
     "new": "net/minecraft/entity/item/EntityMinecartFurnace",
     "old": "net/minecraft/entity/item/minecart/FurnaceMinecartEntity",
     "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/IPacket",
+    "old": "net/minecraft/network/Packet",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/util/EnumFacing",
+    "old": "net/minecraft/util/Direction",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketAnimation",
+    "old": "net/minecraft/network/play/server/SAnimateHandPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketBlockBreakAnim",
+    "old": "net/minecraft/network/play/server/SAnimateBlockBreakPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/nbt/NBTTagCompound",
+    "old": "net/minecraft/nbt/CompoundNBT",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/block/state/IBlockState",
+    "old": "net/minecraft/block/BlockState",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketBlockChange",
+    "old": "net/minecraft/network/play/server/SChangeBlockPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/world/EnumDifficulty",
+    "old": "net/minecraft/world/Difficulty",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketCustomPayload",
+    "old": "net/minecraft/network/play/server/SCustomPayloadPlayPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketCustomSound",
+    "old": "net/minecraft/network/play/server/SPlaySoundPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketEffect",
+    "old": "net/minecraft/network/play/server/SPlaySoundEventPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketParticles",
+    "old": "net/minecraft/network/play/server/SSpawnParticlePacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketMaps",
+    "old": "net/minecraft/network/play/server/SMapDataPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketSignEditorOpen",
+    "old": "net/minecraft/network/play/server/SOpenSignMenuPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketCombatEvent",
+    "old": "net/minecraft/network/play/server/SCombatPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketCombatEvent$Event",
+    "old": "net/minecraft/network/play/server/SCombatPacket$Event",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketPlayerPosLook",
+    "old": "net/minecraft/network/play/server/SPlayerPositionLookPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/inventory/EntityEquipmentSlot",
+    "old": "net/minecraft/inventory/EquipmentSlotType",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketResourcePackSend",
+    "old": "net/minecraft/network/play/server/SSendResourcePackPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/block/state/pattern/BlockPattern$PatternHelper",
+    "old": "net/minecraft/block/pattern/BlockPattern$PatternHelper",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketTimeUpdate",
+    "old": "net/minecraft/network/play/server/SUpdateTimePacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketSoundEffect",
+    "old": "net/minecraft/network/play/server/SPlaySoundEffectPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketNBTQueryResponse",
+    "old": "net/minecraft/network/play/server/SQueryNBTResponsePacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketEntityEffect",
+    "old": "net/minecraft/network/play/server/SPlayEntityEffectPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/client/CPacketNBTQueryTileEntity",
+    "old": "net/minecraft/network/play/client/CQueryTileEntityNBTPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/entity/player/EntityPlayer$EnumChatVisibility",
+    "old": "net/minecraft/entity/player/ChatVisibility",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/util/EnumHandSide",
+    "old": "net/minecraft/util/HandSide",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/inventory/ClickType",
+    "old": "net/minecraft/inventory/container/ClickType",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/util/EnumHand",
+    "old": "net/minecraft/util/Hand",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/client/CPacketNBTQueryEntity",
+    "old": "net/minecraft/network/play/client/CQueryEntityNBTPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/client/CPacketVehicleMove",
+    "old": "net/minecraft/network/play/client/CMoveVehiclePacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/tileentity/TileEntityCommandBlock$Mode",
+    "old": "net/minecraft/tileentity/CommandBlockTileEntity$Mode",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/client/CPacketUpdateCommandMinecart",
+    "old": "net/minecraft/network/play/client/CUpdateMinecartCommandBlockPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/tileentity/TileEntityStructure$UpdateCommand",
+    "old": "net/minecraft/tileentity/StructureBlockTileEntity$UpdateCommand",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/client/CPacketAnimation",
+    "old": "net/minecraft/network/play/client/CAnimateHandPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/EnumConnectionState",
+    "old": "net/minecraft/network/ProtocolType",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketEntityAttach",
+    "old": "net/minecraft/network/play/server/SMountEntityPacket",
+    "versions": "1.9.4->1.13.2"
+  },
+  {
+    "_comment": "ClientboundBlockUpdatePacket#block",
+    "type": "field",
+    "new": "field_148883_d",
+    "old": "field_197686_b",
+    "versions": "1.9.4->1.12.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/world/WorldSettings$GameType",
+    "old": "net/minecraft/world/GameType",
+    "versions": "1.9.4->1.9.4"
+  },
+  {
+    "_comment": "ClientboundSetObjectivePacket#renderType",
+    "type": "field",
+    "new": "field_179818_c",
+    "old": "field_199857_c",
+    "versions": "1.9.4->1.12.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/scoreboard/IScoreCriteria$EnumRenderType",
+    "old": "net/minecraft/scoreboard/ScoreCriteria$RenderType",
+    "versions": "1.9.4->1.13"
+  },
+  {
+    "_comment": "ClientboundSetPlayerTeamPacket#playerPrefix",
+    "type": "field",
+    "new": "field_149319_c",
+    "old": "field_207509_c",
+    "versions": "1.9.4->1.12.2"
+  },
+  {
+    "_comment": "ClientboundSetPlayerTeamPacket#playerSuffix",
+    "type": "field",
+    "new": "field_149316_d",
+    "old": "field_207510_d",
+    "versions": "1.9.4->1.12.2"
+  },
+  {
+    "type": "class",
+    "new": "net/minecraft/network/play/server/SPacketUpdateScore$Action",
+    "old": "net/minecraft/scoreboard/ServerScoreboard$Action",
+    "versions": "1.9.4->1.12.2"
+  },
+  {
+    "_comment": "ServerboundCommandSuggestionPacket#command",
+    "type": "field",
+    "new": "field_149420_a",
+    "old": "field_197711_b",
+    "versions": "1.9.4->1.12.2"
+  },
+  {
+    "_comment": "ServerboundPlayerInputPacket#zza",
+    "type": "field",
+    "new": "field_149622_b",
+    "old": "field_192621_b",
+    "versions": "1.9.4->1.11"
+  },
+  {
+    "_comment": "cursed, bypassing two changes here, change it to CPacketHandshake when it doesn't work",
+    "type": "class",
+    "new": "net/minecraft/network/handshake/client/C00Handshake",
+    "old": "net/minecraft/network/handshake/client/CHandshakePacket",
+    "versions": "1.9.4->1.12.2"
+  },
+  {
+    "_comment": "cursed, bypassing two changes here, change it to SPacketDisconnectLogin when it doesn't work",
+    "type": "class",
+    "new": "net/minecraft/network/login/server/SPacketDisconnect",
+    "old": "net/minecraft/network/login/server/SDisconnectLoginPacket",
+    "versions": "1.9.4->1.12.2"
   }
 ]

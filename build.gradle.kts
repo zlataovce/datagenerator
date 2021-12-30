@@ -51,7 +51,17 @@ val dataVersions: List<String> = listOf(
     "1.14.1",
     "1.14",
     "1.13.2",
-    "1.13.1"
+    "1.13.1",
+    "1.12.2",
+    "1.12.1",
+    "1.12",
+    "1.11.2",
+    "1.11.1",
+    "1.11",
+    "1.10.2",
+    // "1.10.1", - doesn't have searge mappings
+    "1.10",
+    "1.9.4"
 )
 val jarFile: String = tasks.getByName<ShadowJar>("shadowJar").archiveFile.get().asFile.path
 

@@ -2,10 +2,7 @@ package me.kcra.datagenerator
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import me.kcra.datagenerator.gen.AbstractGenerator
-import me.kcra.datagenerator.gen.EntityDataSerializerGenerator
-import me.kcra.datagenerator.gen.FlatteningBlockTypeGenerator
-import me.kcra.datagenerator.gen.FlatteningEntityTypeGenerator
+import me.kcra.datagenerator.gen.*
 import me.kcra.datagenerator.mapping.ClassRemapper
 import me.kcra.datagenerator.mapping.MappingSet
 import me.kcra.datagenerator.mapping.SecondaryMappingSet
@@ -124,7 +121,8 @@ fun main(args: Array<String>) {
     System.setErr(PrintStream(FileOutputStream(FileDescriptor.err)))
 
     val generators: List<AbstractGenerator<*>> = mutableListOf<AbstractGenerator<*>>(
-        EntityDataSerializerGenerator(mapper, classRemapper, minecraftJarReader)
+        EntityDataSerializerGenerator(mapper, classRemapper, minecraftJarReader),
+        PacketGenerator(mapper, classRemapper, minecraftJarReader)
     ).also {
         if (version.isNewerThan(1, 13, 0, null)) {
             it.add(FlatteningEntityTypeGenerator(mapper, classRemapper, minecraftJarReader))
@@ -138,5 +136,4 @@ fun main(args: Array<String>) {
         gen.generateJson(Path.of(System.getProperty("user.dir"), "generated", fileName).toAbsolutePath().toFile())
     }
     minecraftJarReader.classLoader.close()
-    Path.of(System.getProperty("user.dir"), "logs").toAbsolutePath().toFile().deleteRecursively()
 }

@@ -13,7 +13,7 @@ class EntityDataSerializersVisitor(private val className: String, private val cl
         access: Int,
         name: String,
         descriptor: String,
-        signature: String,
+        signature: String?,
         value: Any?
     ): FieldVisitor? {
         if (classRemapper.remapClass(descriptor.substring(1, descriptor.length - 1))?.mapped.equals("net/minecraft/network/syncher/EntityDataSerializer")) {

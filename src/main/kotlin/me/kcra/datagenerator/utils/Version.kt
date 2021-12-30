@@ -30,6 +30,10 @@ class Version(version: String) {
         return toString() == version
     }
 
+    fun matches(version: Version): Boolean {
+        return matches(version.majorVersion, version.minorVersion, version.patchVersion, version.suffix)
+    }
+
     fun matches(major: Int, minor: Int, patch: Int, suffix: String?): Boolean {
         return this.majorVersion == major && this.minorVersion == minor && this.patchVersion == patch && this.suffix == suffix
     }
@@ -59,7 +63,7 @@ class Version(version: String) {
     }
 
     fun isNewerThan(major: Int, minor: Int, patch: Int, suffix: String?): Boolean {
-        return majorVersion > major || minorVersion > minor || patchVersion > patch || this.suffix != suffix
+        return majorVersion > major || (minorVersion > minor && patchVersion > patch) || this.suffix != suffix
     }
 
     fun isNewerThan(other: Version): Boolean {
@@ -73,33 +77,11 @@ class Version(version: String) {
     }
 
     fun isBetween(min: Version, max: Version): Boolean {
-        return (isNewerThan(min) && isOlderThan(max)) || (equals(min) || equals(max))
+        return (isNewerThan(min) && isOlderThan(max)) || matches(min) || matches(max)
     }
 
     override fun toString(): String {
         return "$majorVersion.$minorVersion${if (patchVersion != 0) ".$patchVersion" else ""}${if (suffix != null) "-$suffix" else ""}"
-    }
-
-    override fun hashCode(): Int {
-        var result = majorVersion
-        result = 31 * result + minorVersion
-        result = 31 * result + patchVersion
-        result = 31 * result + (suffix?.hashCode() ?: 0)
-        return result
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Version
-
-        if (majorVersion != other.majorVersion) return false
-        if (minorVersion != other.minorVersion) return false
-        if (patchVersion != other.patchVersion) return false
-        if (suffix != other.suffix) return false
-
-        return true
     }
 
     @JsonDeserialize(using = VersionRangeDeserializer::class)
