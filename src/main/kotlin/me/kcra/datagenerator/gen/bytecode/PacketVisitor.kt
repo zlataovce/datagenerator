@@ -68,9 +68,9 @@ class PacketVisitor(private val classRemapper: ClassRemapper) : ClassVisitor(Opc
                 return if (type.startsWith("[")) {
                     convertBytecodeType(type.substring(1)) + "[]"
                 } else if (type.endsWith(";")) {
-                    type.substring(1, type.length - 1).replace("/", ".")
+                    type.substring(1, type.length - 1)
                 } else {
-                    type.substring(1).replace("/", ".")
+                    type.substring(1)
                 }
             }
         }

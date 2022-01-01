@@ -11,7 +11,7 @@ Changing the reference mappings (ref arguments) is not recommended and will prob
 Generated files will be in the `generated` folder.
 
 ## Data
-* `EntityDataSerializers` - 1.9.4 to the latest (mojang names, protocol ID's)
+* `EntityDataSerializers` - 1.9.4 to the latest (mojang names, protocol IDs)
 * `EntityTypes` - 1.13.1 to the latest (mojang names, translation keys, physics properties, ...)
 * `Blocks` - 1.13.1 to the latest (mojang names, translation keys, physics properties, ...)
 * `Packets` - 1.9.4 to the latest (mojang names, fields)
