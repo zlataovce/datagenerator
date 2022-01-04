@@ -95,11 +95,11 @@ class ClassRemapper(
         }
         if (mapping.intermediary != null) {
             return mapping.intermediary.getMappedClass0(
-                refMapping.intermediary.getClass(refMapping.mojang.getMappedClass0(mapped)?.original).mapped
+                refMapping.intermediary.getClass(refMapping.mojang.getMappedClass0(mapped)?.original)!!.mapped
             )
         }
         val refClass: IMappingFile.IClass =
-            refMapping.searge.getClass(refMapping.mojang.getMappedClass0(mapped)?.original)
+            refMapping.searge.getClass(refMapping.mojang.getMappedClass0(mapped)?.original)!!
         val result: IMappingFile.IClass? = mapping.searge.getMappedClass0(refClass.mapped)
         // 1.14> searge entity class name inconsistency fix
         if (result == null && isSeargeEntityClassNew(refClass.mapped)) {
@@ -121,11 +121,11 @@ class ClassRemapper(
         if (mapping.intermediary != null) {
             return refMappingLocal.mojang.getClass(
                 refMappingLocal.intermediary.getMappedClass0(
-                    mapping.intermediary.getClass(obf).mapped
+                    mapping.intermediary.getClass(obf)!!.mapped
                 )?.original
             ) ?: if (refMapping2 != null && firstRemapping) remapClass(refMapping2, obf, false) else null
         }
-        val seargeClass: IMappingFile.IClass = mapping.searge.getClass(obf)
+        val seargeClass: IMappingFile.IClass = mapping.searge.getClass(obf)!!
         var seargeVClass: IMappingFile.IClass? = refMappingLocal.searge.getMappedClass0(seargeClass.mapped)
         // 1.14> searge packet class name inconsistency fix
         if (seargeVClass == null && (isSeargeServerPacketClassOld(seargeClass.mapped) || isSeargeClientPacketClassOld(seargeClass.mapped))) {
@@ -206,20 +206,22 @@ class ClassRemapper(
 
     fun remapMethod(cls: String, method: String): IMappingFile.IMethod? {
         if (mapping == null) {
-            return refMapping.mojang.getClass(cls).methods.stream()
-                .filter { it.mapped.equals(method) }
-                .findFirst()
-                .orElse(null)
+            return refMapping.mojang.getClass(cls)?.let { it1 ->
+                it1.methods.stream()
+                    .filter { it.mapped.equals(method) }
+                    .findFirst()
+                    .orElse(null)
+            }
         }
         if (mapping.intermediary != null) {
-            val intermClass: IMappingFile.IClass = mapping.intermediary.getClass(cls)
+            val intermClass: IMappingFile.IClass = mapping.intermediary.getClass(cls)!!
             val intermMethod: IMappingFile.IMethod? = intermClass.getMethod(method)
             val intermVClass: IMappingFile.IClass? = refMapping.intermediary.getMappedClass0(intermClass.mapped)
             val intermVMethod: IMappingFile.IMethod? =
                 intermVClass?.let { intermMethod?.let { it1 -> it.getMappedMethod(it1.mapped) } }
             return intermVClass?.let { intermVMethod?.let { it1 -> it.getMethod(it1.original) } }
         }
-        val seargeClass: IMappingFile.IClass = mapping.searge.getClass(cls)
+        val seargeClass: IMappingFile.IClass = mapping.searge.getClass(cls)!!
         val seargeMethod: IMappingFile.IMethod? = seargeClass.getMethod(method)
         val seargeVClass: IMappingFile.IClass? = refMapping.searge.getMappedClass0(seargeClass.mapped)
         val seargeVMethod: IMappingFile.IMethod? =
@@ -258,10 +260,10 @@ class ClassRemapper(
         firstRemapping: Boolean
     ): IMappingFile.IField? {
         if (mapping == null) {
-            return refMappingLocal.mojang.getClass(cls).getField(field)
+            return refMappingLocal.mojang.getClass(cls)!!.getField(field)
         }
         if (mapping.intermediary != null) {
-            val intermClass: IMappingFile.IClass = mapping.intermediary.getClass(cls)
+            val intermClass: IMappingFile.IClass = mapping.intermediary.getClass(cls)!!
             val intermField: IMappingFile.IField? = intermClass.getField(field)
             val intermVClass: IMappingFile.IClass? = refMappingLocal.intermediary.getMappedClass0(intermClass.mapped)
             val intermVField: IMappingFile.IField? =
@@ -269,7 +271,7 @@ class ClassRemapper(
             return refMappingLocal.mojang.getClass(intermVClass?.original)?.getField(intermVField?.original)
                 ?: if (refMapping2 != null && firstRemapping) remapField(cls, field, refMapping2, false) else null
         }
-        val seargeClass: IMappingFile.IClass = mapping.searge.getClass(cls)
+        val seargeClass: IMappingFile.IClass = mapping.searge.getClass(cls)!!
         val seargeField: IMappingFile.IField? = seargeClass.getField(field)
         // hardcoded values
         when (seargeField?.mapped) {
